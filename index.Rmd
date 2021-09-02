@@ -1,0 +1,16 @@
+---
+title: "Harmonisation et traitement de la base de données AirDNA" 
+subtitle: "Contribution à une analyse reproductible"
+author: Louis Laurian, Master Géoprisme, Université de Paris
+date: <small>`r format(Sys.time(), '%d %B %Y')`</small>
+---
+
+
+# Objectifs
+
+
+# Encadrement
+
+Encadrement réalisé par Marianne Guérois, Malika Madelin et Ronan Ysebaert
+
+# Mémoire associé

@@ -1,0 +1,28 @@
+name: "my-website"
+navbar:
+  type: inverse
+  left:
+    - text: "Accueil"
+      href: index.html
+    - text: "Préparation des données"
+      href: prepadonnees.html
+    - text: "Synthèse à la commune"
+      href: synthese.html
+    - text: "Comparaison"
+      href: compar.html
+    - text: "À propos"
+      href: about.html
+  right:
+    - icon: fa-github
+      href: https://github.com/riateStage/airdna_laurian
+output_dir: "_site"
+exclude: ["data", "meta", "old", ".Rhistory", "Memoire"]
+
+output:
+  html_document:
+    toc_float: TRUE
+    theme: united
+    highlight: tango
+    number_sections: yes
+
+

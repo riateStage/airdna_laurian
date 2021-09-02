@@ -1,0 +1,4105 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Préparation des données</title>
+
+<script src="site_libs/header-attrs-2.9/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/united.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html"></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Accueil</a>
+</li>
+<li>
+  <a href="prepadonnees.html">Préparation des données</a>
+</li>
+<li>
+  <a href="synthese.html">Synthèse à la commune</a>
+</li>
+<li>
+  <a href="compar.html">Comparaison</a>
+</li>
+<li>
+  <a href="about.html">À propos</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/riateStage/airdna_laurian">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Préparation des données</h1>
+
+</div>
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rmdformats)</span></code></pre></div>
+<p>Cette partie vise à préparer et nettoyer les données des logements Airbnb fournis par Airdna en vue de diverses analyses. La finalité de ce markdown est d’exporter les tableaux de données ainsi que les couches géographiques nettoyées de manière générique, de sorte à ce que ce code soit reproductible peu importe la commune d’entrée. Les deux paramètres à rentrer en début d’éxecution du code sont le code INSEE ainsi que le nom de la commune.</p>
+<p>Afin de préparer les données pour une autre commune, le script <strong>prep.R</strong> condense toutes les opérations ci-dessous sous forme de fonctions, pour obtenir les mêmes résultats pour la commune sélectionnée, c’est-à-dire des fichiers consolidés ainsi qu’un geopackage regroupant les couches géographiques de la commune concernée. Ce script est appelé dans le markdown <strong>fonctions_prepadonnees.Rmd</strong> qu’il suffit d’exécuter en modifiant les paramètres du premier chunk, à savoir les deux fichiers fournis par Airdna pour la commune de référence, ainsi que le nom et le code INSEE de la commune.</p>
+<p>Dans ce document, les tableaux en entrée correspondent à la commune d’Issy-les-Moulineaux.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On rentre ici le code INSEE de la commune de référence</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>codeinsee <span class="ot">&lt;-</span> <span class="dv">92040</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>nomcom <span class="ot">&lt;-</span> <span class="st">&quot;Issy&quot;</span></span></code></pre></div>
+<p>Les deux tableaux de données principaux seront les fichiers appelés <strong>mensuel_raw</strong> et <strong>individuel_raw</strong> et sont fournis par la plateforme Airdna. Le premier tableau de données contient les bilans mensuels des scraping. Cette base de données indique les mois durant lesquels chaque logement a été scrapé ainsi que les bilans en terme de fréquentation et de revenus engendrés durant le mois scrapé. La seconde base de données est plus détaillée mais est individuelle pour chaque logement Airbnb. En effet, on a 70 variables décrivant la totalité des logements présents dans la commune depuis le début de leur mise en ligne sur le marché : chaque ligne représente un logement. On a donc pour certains d’entre eux des logements qui ne sont plus actifs voire qui ont été retirés du marché.</p>
+<p>Certaines variables sont communes aux deux bases de données. La différence entre les deux tableaux provient de la profondeur temporelle: le premier tableau résume les caractéristiques en terme de revenus et de fréquentation mois par mois depuis 2015 tandis que le second les agrège sur l’année passée (LTM = Last Twelve Months, novembre 2019-novembre 2020), mais contient aussi de données ayant une profondeur temporelle plus élevée, comme le nombre de commentaires reçu pour une location.</p>
+<p>À cela s’ajoutent les tableaux descriptifs des variables, fournis eux aussi par Airdna et traduits par mes soins, qui définissent chacune des variables des tableaux de données.</p>
+<div id="import-et-description-des-variables" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Import et description des variables</h1>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Packages nécessaires à la lecture des tableaux de données et aux traitements </span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import des données</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>mensuel_raw <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;data/raw/France-issy-les-moulineaux_Monthly_Match_2020-12-10.csv&quot;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>individuel_raw <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;data/raw/France-issy-les-moulineaux_Property_Extended_Match_2020-12-10.csv&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tableaux descriptifs des variables</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Descr_individuel <span class="ot">&lt;-</span> <span class="fu">read_delim</span>(<span class="st">&quot;meta/Descr_individuel.csv&quot;</span>, </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;;&quot;</span>, <span class="at">escape_double =</span> <span class="cn">FALSE</span>, <span class="at">trim_ws =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>Descr_mensuel <span class="ot">&lt;-</span> <span class="fu">read_delim</span>(<span class="st">&quot;meta/Descr_mensuel.csv&quot;</span>, </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;;&quot;</span>, <span class="at">escape_double =</span> <span class="cn">FALSE</span>, <span class="at">trim_ws =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>Afin d’avoir des éléments de contexte de la commune, nous rentrons aussi des données issues de la base de tourisme hôtelier (2019) ainsi que des données INSEE sur le nombre de logements dans chaque commune d’Île-de-France (2017).</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>log_tot <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;data/insee/INSEE_logements_idf.csv&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>hotels <span class="ot">&lt;-</span> <span class="fu">read_xls</span>(<span class="st">&quot;data/insee/base-cc-tourisme-2019-geo2019.xls&quot;</span>, <span class="at">skip =</span> <span class="dv">3</span>)</span></code></pre></div>
+<p>Une première étape de description des variables permettrait d’en apprendre un peu plus sur ces dernières, notamment lesquelles conserver pour de futures analyses. Ce premier tableau définit chaque variable et dénombre les modalités non attribuées (<em>NA</em>), ainsi que le nombre de modalités unique et le nombre de 0 pour les variables quantitatives. Il est nécessaire pour étudier la potentielle employabilité des variables à notre disposition.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On prépare la fonction qui permet de calculer le nombre de NA par variable</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">&quot;Nombre de valeurs uniques&quot;</span> <span class="ot">=</span> <span class="fu">length</span>(<span class="fu">unique</span>(x)),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Nombre de 0&quot;</span> <span class="ot">=</span> <span class="fu">sum</span>(x <span class="sc">==</span> <span class="dv">0</span>),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Nombre de valeurs NA&quot;</span> <span class="ot">=</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(x)),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Pourcentage de valeurs NA&quot;</span> <span class="ot">=</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(x))<span class="sc">/</span><span class="fu">length</span>(x)<span class="sc">*</span><span class="dv">100</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># On l&#39;applique ensuite aux deux dataframe </span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>mensuel <span class="ot">&lt;-</span> mensuel_raw</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel_raw</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(mensuel,f))</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(df)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>tmp <span class="ot">&lt;-</span> <span class="fu">rownames</span>(df)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">merge</span>(df, Descr_mensuel[,<span class="fu">c</span>(<span class="st">&quot;Variable&quot;</span>, <span class="st">&quot;Description&quot;</span>)], <span class="at">by.x =</span> <span class="st">&quot;tmp&quot;</span>,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">by.y =</span> <span class="st">&quot;Variable&quot;</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="st">&quot;Variable&quot;</span> <span class="ot">=</span> <span class="st">&quot;tmp&quot;</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(df, <span class="at">digits =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_paper</span>()</span></code></pre></div>
+<table class=" lightable-paper" style="font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Variable
+</th>
+<th style="text-align:right;">
+Nombre de valeurs uniques
+</th>
+<th style="text-align:right;">
+Nombre de 0
+</th>
+<th style="text-align:right;">
+Nombre de valeurs NA
+</th>
+<th style="text-align:right;">
+Pourcentage de valeurs NA
+</th>
+<th style="text-align:left;">
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Active
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+30411
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+TRUE si le logement a été proposé ou réservé au moins un jour durant la période de récolte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ADR (Native)
+</td>
+<td style="text-align:right;">
+6400
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+35340
+</td>
+<td style="text-align:right;">
+73.9
+</td>
+<td style="text-align:left;">
+Revenus engendré par l’hôte pour une réservation, dans la devise choisie par l’hôte : Revenus totaux / Nombre de nuitées réservées
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ADR (USD)
+</td>
+<td style="text-align:right;">
+6371
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+34893
+</td>
+<td style="text-align:right;">
+73.0
+</td>
+<td style="text-align:left;">
+Revenus engendré par l’hôte pour une réservation, en dollars : Revenus totaux / Nombre de nuitées réservées
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Airbnb Host ID
+</td>
+<td style="text-align:right;">
+1534
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2645
+</td>
+<td style="text-align:right;">
+5.5
+</td>
+<td style="text-align:left;">
+Identifiant unique de chaque hôte Airbnb
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Airbnb Property ID
+</td>
+<td style="text-align:right;">
+1788
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2632
+</td>
+<td style="text-align:right;">
+5.5
+</td>
+<td style="text-align:left;">
+Identifiant unique de chaque propriété Airbnb
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Available Days
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+26149
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Nombre de jours classifiés comme disponibles, mais non réservés
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bedrooms
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+27
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+<td style="text-align:left;">
+Nombre de chambres
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Blocked Days
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+13991
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Nombre de jours classifiés comme bloqués à la réservation.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+City
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Ville dans laquelle se situe le logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Country
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Pays dans lequel se situe le logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Currency Native
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3064
+</td>
+<td style="text-align:right;">
+6.4
+</td>
+<td style="text-align:left;">
+Devise choisie par l’hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HomeAway Property ID
+</td>
+<td style="text-align:right;">
+113
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+44579
+</td>
+<td style="text-align:right;">
+93.2
+</td>
+<td style="text-align:left;">
+Identifiant unique de chaque propriété Homeaway
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HomeAway Property Manager
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+47561
+</td>
+<td style="text-align:right;">
+99.5
+</td>
+<td style="text-align:left;">
+Identifiant unique de chaque hôte Homeaway
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Latitude
+</td>
+<td style="text-align:right;">
+1572
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Latitude du logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Listing Type
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Type de logement (selon modalités Airbnb)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Longitude
+</td>
+<td style="text-align:right;">
+1728
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Longitude du logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Metropolitan Statistical Area
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+47817
+</td>
+<td style="text-align:right;">
+100.0
+</td>
+<td style="text-align:left;">
+Aire statistique métropolitaine dans laquelle se trouve le logement (seulement aux USA)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Neighborhood
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+47817
+</td>
+<td style="text-align:right;">
+100.0
+</td>
+<td style="text-align:left;">
+Quartier où se situe le logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Number of Reservations
+</td>
+<td style="text-align:right;">
+26
+</td>
+<td style="text-align:right;">
+35310
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Nombre de réservations durant le mois
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Occupancy Rate
+</td>
+<td style="text-align:right;">
+310
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3618
+</td>
+<td style="text-align:right;">
+7.6
+</td>
+<td style="text-align:left;">
+Taux de fréquentation : Nombre de jours réservés / (nombre de nuitées réservés + nombre de nuitées disponibles) pendant le mois
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Property ID
+</td>
+<td style="text-align:right;">
+1877
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Identifiant unique de chaque propriété
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Property Type
+</td>
+<td style="text-align:right;">
+43
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Type de logement (choisi par l’hôte)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Reporting Month
+</td>
+<td style="text-align:right;">
+64
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Mois pendant lequel les données ont été récoltées
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Reservation Days
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+34909
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Nombre de nuitées réservées durant le mois
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Revenue (Native)
+</td>
+<td style="text-align:right;">
+8797
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2722
+</td>
+<td style="text-align:right;">
+5.7
+</td>
+<td style="text-align:left;">
+Revenus totaux engendrés pendant la période de récolte dans la devise choisie par l’hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Revenue (USD)
+</td>
+<td style="text-align:right;">
+6544
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+6983
+</td>
+<td style="text-align:right;">
+14.6
+</td>
+<td style="text-align:left;">
+Revenus totaux engendrés pendant la période de récolte en dollars
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Scraped During Month
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+15595
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+TRUE si le logement a été scrapé pendant le mois
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+State
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Région dans laquelle se situe le logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Zipcode
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+47817
+</td>
+<td style="text-align:right;">
+100.0
+</td>
+<td style="text-align:left;">
+Code postal de la ville du logement
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(individuel,f))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(df)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>tmp <span class="ot">&lt;-</span> <span class="fu">rownames</span>(df)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">merge</span>(df, Descr_individuel[,<span class="fu">c</span>(<span class="st">&quot;Variable&quot;</span>, <span class="st">&quot;Description&quot;</span>)], <span class="at">by.x =</span> <span class="st">&quot;tmp&quot;</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">by.y =</span> <span class="st">&quot;Variable&quot;</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="st">&quot;Variable&quot;</span> <span class="ot">=</span> <span class="st">&quot;tmp&quot;</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(df, <span class="at">digits =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_paper</span>()</span></code></pre></div>
+<table class=" lightable-paper" style="font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Variable
+</th>
+<th style="text-align:right;">
+Nombre de valeurs uniques
+</th>
+<th style="text-align:right;">
+Nombre de 0
+</th>
+<th style="text-align:right;">
+Nombre de valeurs NA
+</th>
+<th style="text-align:right;">
+Pourcentage de valeurs NA
+</th>
+<th style="text-align:left;">
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Airbnb Accuracy Rating
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+741
+</td>
+<td style="text-align:right;">
+39.5
+</td>
+<td style="text-align:left;">
+Note sur 10 attribuée par le visiteur à l’exactitude de l’annonce
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Airbnb Checkin Rating
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+741
+</td>
+<td style="text-align:right;">
+39.5
+</td>
+<td style="text-align:left;">
+Note sur 10 attribuée par le visiteur à l’accueil de l’hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Airbnb Cleanliness Rating
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+741
+</td>
+<td style="text-align:right;">
+39.5
+</td>
+<td style="text-align:left;">
+Note sur 10 attribuée par le visiteur à la propreté du logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Airbnb Communication Rating
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+741
+</td>
+<td style="text-align:right;">
+39.5
+</td>
+<td style="text-align:left;">
+Note sur 10 attribuée par le visiteur à la communication de l’hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Airbnb Home Collection
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1878
+</td>
+<td style="text-align:right;">
+100.0
+</td>
+<td style="text-align:left;">
+TRUE : le logement fait partie d’un ensemble de logements sélectionnés par Airbnb pour un type spécifique de voyage
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Airbnb Host ID
+</td>
+<td style="text-align:right;">
+1534
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+93
+</td>
+<td style="text-align:right;">
+5.0
+</td>
+<td style="text-align:left;">
+Identifiant unique de chaque hôte Airbnb
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Airbnb Location Rating
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+741
+</td>
+<td style="text-align:right;">
+39.5
+</td>
+<td style="text-align:left;">
+Note sur 10 attribuée par le visiteur à la localisation du logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Airbnb Property ID
+</td>
+<td style="text-align:right;">
+1788
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+91
+</td>
+<td style="text-align:right;">
+4.8
+</td>
+<td style="text-align:left;">
+Identifiant unique de chaque propriété Airbnb
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Airbnb Property Plus
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1878
+</td>
+<td style="text-align:right;">
+100.0
+</td>
+<td style="text-align:left;">
+TRUE : le logement est considéré par Airbnb comme étant « exceptionnel » et vérifié par un contrôle qualité
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Airbnb Response Time (Text)
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+936
+</td>
+<td style="text-align:right;">
+49.8
+</td>
+<td style="text-align:left;">
+Temps de réponse de l’hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Airbnb Superhost
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:right;">
+5.9
+</td>
+<td style="text-align:left;">
+TRUE si l’hôte est Superhost
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Airbnb Value Rating
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+742
+</td>
+<td style="text-align:right;">
+39.5
+</td>
+<td style="text-align:left;">
+Note sur 10 attribuée par le visiteur au rapport qualité/prix
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Amenities
+</td>
+<td style="text-align:right;">
+1729
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+1.1
+</td>
+<td style="text-align:left;">
+Aménités présentes au sein du logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Annual Revenue LTM (Native)
+</td>
+<td style="text-align:right;">
+445
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+91
+</td>
+<td style="text-align:right;">
+4.8
+</td>
+<td style="text-align:left;">
+Revenus totaux engendrés par l’hôte sur l’année passée, dans la devise choisie par l’hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Annual Revenue LTM (USD)
+</td>
+<td style="text-align:right;">
+487
+</td>
+<td style="text-align:right;">
+1383
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Revenus totaux engendrés par l’hôte sur l’année passée, en dollars
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Average Daily Rate (Native)
+</td>
+<td style="text-align:right;">
+402
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1401
+</td>
+<td style="text-align:right;">
+74.6
+</td>
+<td style="text-align:left;">
+Revenus engendré par l’hôte pour une réservation, dans la devise choisie par l’hôte sur l’année passée : Revenus totaux / Nombre de nuitées réservées
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Average Daily Rate (USD)
+</td>
+<td style="text-align:right;">
+467
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1383
+</td>
+<td style="text-align:right;">
+73.6
+</td>
+<td style="text-align:left;">
+Revenus engendré par l’hôte pour une réservation, en dollars sur l’année passée : Revenus totaux / Nombre de nuitées réservées
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bathrooms
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:left;">
+Nombre de salles de bain
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bedrooms
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+<td style="text-align:left;">
+Nombre de chambres
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Calendar Last Updated
+</td>
+<td style="text-align:right;">
+893
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+235
+</td>
+<td style="text-align:right;">
+12.5
+</td>
+<td style="text-align:left;">
+Dernier jour durant lequel l’hôte a mis à jour son calendrier
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cancellation Policy
+</td>
+<td style="text-align:right;">
+37
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+0.6
+</td>
+<td style="text-align:left;">
+Mesures d’annulation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Check-in Time
+</td>
+<td style="text-align:right;">
+225
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+457
+</td>
+<td style="text-align:right;">
+24.3
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Checkout Time
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+877
+</td>
+<td style="text-align:right;">
+46.7
+</td>
+<td style="text-align:left;">
+Heure du checkout
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+City
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Ville dans laquelle se situe le logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cleaning Fee (Native)
+</td>
+<td style="text-align:right;">
+71
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1214
+</td>
+<td style="text-align:right;">
+64.6
+</td>
+<td style="text-align:left;">
+Frais de ménage par réservation dans la devise choisie par l’hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cleaning Fee (USD)
+</td>
+<td style="text-align:right;">
+126
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+950
+</td>
+<td style="text-align:right;">
+50.6
+</td>
+<td style="text-align:left;">
+Frais de ménage par réservation en dollars
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Count Available Days LTM
+</td>
+<td style="text-align:right;">
+162
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1383
+</td>
+<td style="text-align:right;">
+73.6
+</td>
+<td style="text-align:left;">
+Nombre de jours classés comme disponibles, c’est à dire proposés à la location mais non réservé durant les 12 derniers mois
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Count Blocked Days LTM
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1383
+</td>
+<td style="text-align:right;">
+73.6
+</td>
+<td style="text-align:left;">
+Nombre de jours classés comme bloqués durant les 12 derniers mois
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Count Reservation Days LTM
+</td>
+<td style="text-align:right;">
+144
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1383
+</td>
+<td style="text-align:right;">
+73.6
+</td>
+<td style="text-align:left;">
+Nombre de jours classés comme réservés durant les 12 derniers mois
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Country
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Pays dans lequel se situe le logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Created Date
+</td>
+<td style="text-align:right;">
+992
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+91
+</td>
+<td style="text-align:right;">
+4.8
+</td>
+<td style="text-align:left;">
+Date durant laquelle a été mis en ligne le logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Currency Native
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+112
+</td>
+<td style="text-align:right;">
+6.0
+</td>
+<td style="text-align:left;">
+Devise choisie par l’hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Exact Location
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+<td style="text-align:left;">
+TRUE : l’annonce est à l’endroit précis où elle est localisée
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Extra People Fee (Native)
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1574
+</td>
+<td style="text-align:right;">
+83.8
+</td>
+<td style="text-align:left;">
+Frais pour un voyageur supplémentaire dans la devise choisie par l’hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Extra People Fee (USD)
+</td>
+<td style="text-align:right;">
+44
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1487
+</td>
+<td style="text-align:right;">
+79.2
+</td>
+<td style="text-align:left;">
+Frais pour un voyageur supplémentaire en dollars
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HomeAway Location Type
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1848
+</td>
+<td style="text-align:right;">
+98.4
+</td>
+<td style="text-align:left;">
+Type de logement HomeAway
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HomeAway Premier Partner
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1787
+</td>
+<td style="text-align:right;">
+95.2
+</td>
+<td style="text-align:left;">
+TRUE si l’hôte est Premier Partner chez HomeAway
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HomeAway Property ID
+</td>
+<td style="text-align:right;">
+117
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1762
+</td>
+<td style="text-align:right;">
+93.8
+</td>
+<td style="text-align:left;">
+Identifiant unique de chaque propriété Homeaway
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HomeAway Property Manager ID
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1878
+</td>
+<td style="text-align:right;">
+100.0
+</td>
+<td style="text-align:left;">
+Identifiant unique de chaque hôte Homeaway
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Instantbook Enabled
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1314
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+TRUE : l’annonce peut être réservée sans devoir communiquer avec l’hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Integrated Property Manager
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1787
+</td>
+<td style="text-align:right;">
+95.2
+</td>
+<td style="text-align:left;">
+TRUE : l’hôte vit dans le logement qu’il loue
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Last Scraped Date
+</td>
+<td style="text-align:right;">
+754
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Dernier jour où le logement a été scrapé. Chaque logement est scrapé tous les 3 jours
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Latitude
+</td>
+<td style="text-align:right;">
+1573
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Latitude du logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+License
+</td>
+<td style="text-align:right;">
+98
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1777
+</td>
+<td style="text-align:right;">
+94.6
+</td>
+<td style="text-align:left;">
+Numéro de licence de l’hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Listing Images
+</td>
+<td style="text-align:right;">
+1711
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+154
+</td>
+<td style="text-align:right;">
+8.2
+</td>
+<td style="text-align:left;">
+Photos de l’annonce
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Listing Main Image URL
+</td>
+<td style="text-align:right;">
+1860
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Lien URL vers la photo principale de l’annonce
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Listing Title
+</td>
+<td style="text-align:right;">
+1835
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Titre de l’annonce
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Listing Type
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Type de logement (selon modalités Airbnb)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Listing URL
+</td>
+<td style="text-align:right;">
+1878
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Lien URL vers l’annonce
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Longitude
+</td>
+<td style="text-align:right;">
+1729
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Longitude du logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Max Guests
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+<td style="text-align:left;">
+Capacité d’accueil en nombre de voyageurs
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Metropolitan Statistical Area
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1878
+</td>
+<td style="text-align:right;">
+100.0
+</td>
+<td style="text-align:left;">
+Aire statistique métropolitaine dans laquelle se trouve le logement (seulement aux USA)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Minimum Stay
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+0.8
+</td>
+<td style="text-align:left;">
+Durée minimale du séjour
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Neighborhood
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1878
+</td>
+<td style="text-align:right;">
+100.0
+</td>
+<td style="text-align:left;">
+Quartier où se situe le logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Number of Bookings LTM
+</td>
+<td style="text-align:right;">
+61
+</td>
+<td style="text-align:right;">
+1429
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Nombre de réservations lors des 12 derniers mois
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Number of Photos
+</td>
+<td style="text-align:right;">
+53
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+0.6
+</td>
+<td style="text-align:left;">
+Nombre de photos présentes sur l’annonce
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Number of Reviews
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+<td style="text-align:left;">
+Nombre total de commentaires sur l’annonce
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Occupancy Rate LTM
+</td>
+<td style="text-align:right;">
+338
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1383
+</td>
+<td style="text-align:right;">
+73.6
+</td>
+<td style="text-align:left;">
+Taux de fréquentation : Nombre de jours réservés / (nombre de nuitées réservés + nombre de nuitées disponibles) Les calculs ne prennent pas en compte les jours bloqués et les mois sans réservation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Overall Rating
+</td>
+<td style="text-align:right;">
+43
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+707
+</td>
+<td style="text-align:right;">
+37.6
+</td>
+<td style="text-align:left;">
+Note du visiteur sur une échelle de 0 à 100
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Pets Allowed
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+91
+</td>
+<td style="text-align:right;">
+4.8
+</td>
+<td style="text-align:left;">
+TRUE : les animaux sont autorisés au sein du logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Property ID
+</td>
+<td style="text-align:right;">
+1878
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Identifiant unique de chaque propriété
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Property Type
+</td>
+<td style="text-align:right;">
+43
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+<td style="text-align:left;">
+Type de logement (choisi par l’hôte)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Published Monthly Rate (USD)
+</td>
+<td style="text-align:right;">
+1013
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+505
+</td>
+<td style="text-align:right;">
+26.9
+</td>
+<td style="text-align:left;">
+Prix mensuel choisi par l’hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Published Nightly Rate (USD)
+</td>
+<td style="text-align:right;">
+282
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+111
+</td>
+<td style="text-align:right;">
+5.9
+</td>
+<td style="text-align:left;">
+Prix choisi par l’hôte pour une nuitée
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Published Weekly Rate (USD)
+</td>
+<td style="text-align:right;">
+656
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+504
+</td>
+<td style="text-align:right;">
+26.8
+</td>
+<td style="text-align:left;">
+Prix hebdomadaire choisi par l’hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Response Rate
+</td>
+<td style="text-align:right;">
+53
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+298
+</td>
+<td style="text-align:right;">
+15.9
+</td>
+<td style="text-align:left;">
+Pourcentage de réponse de l’hôte dans les 24h
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Security Deposit (Native)
+</td>
+<td style="text-align:right;">
+54
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1327
+</td>
+<td style="text-align:right;">
+70.7
+</td>
+<td style="text-align:left;">
+Caution choisie par l’hôte dans sa devise
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Security Deposit (USD)
+</td>
+<td style="text-align:right;">
+338
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1239
+</td>
+<td style="text-align:right;">
+66.0
+</td>
+<td style="text-align:left;">
+Caution choisie par l’hôte en dollars
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+State
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:left;">
+Région dans laquelle se situe le logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Zipcode
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1878
+</td>
+<td style="text-align:right;">
+100.0
+</td>
+<td style="text-align:left;">
+Code postal de la ville du logement
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="sélection-des-variables" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Sélection des variables</h1>
+<p>Première remarque : on a trop de variables. On passe donc par une première étape de sélection des variables afin de ne conserver que celles utiles à nos analyses. Au nombre de chambres par exemple, on va préférer la capacité de voyageurs qui se trouve dans la colonne <strong>Max Guests</strong> du second tableau. De plus, les colonnes correspondant aux prix payés par les visiteurs étant exprimées seulement en dollars, on fait le choix de ne garder que les valeurs en dollars par souci d’harmonisation. Pour faire la conversion, un dollar s’échange contre 0.83€ à la date du 10/12/2020 (dernier mois scrapé). En ce qui concerne les caractéristiques de localisation des logements, on ne garde que la latitude et la longitude qui permettront par la suite de cartographier ces derniers. Etant donné que la totalité des logements se trouvent au sein d’une même commune, il n’est pas nécessaire de garder les variables telles que la ville, le pays, etc. Les notes attribuées aux logements ne feront pas l’objet d’analyses pointues, ainsi on les supprime de notre tableau. Les variables correspondant à la description de l’annonce sur le site airbnb.fr ainsi que celles liées aux logements HomeAway seront elles aussis supprimées.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>mensuel <span class="ot">&lt;-</span> mensuel <span class="sc">%&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">`</span><span class="at">Property ID</span><span class="st">`</span>, <span class="st">`</span><span class="at">Listing Type</span><span class="st">`</span>, <span class="st">`</span><span class="at">Property Type</span><span class="st">`</span>, <span class="st">`</span><span class="at">Reporting Month</span><span class="st">`</span>, <span class="st">`</span><span class="at">Occupancy Rate</span><span class="st">`</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Revenue (USD)</span><span class="st">`</span>,<span class="st">`</span><span class="at">ADR (USD)</span><span class="st">`</span>,<span class="st">`</span><span class="at">Number of Reservations</span><span class="st">`</span>, <span class="st">`</span><span class="at">Reservation Days</span><span class="st">`</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Available Days</span><span class="st">`</span>, <span class="st">`</span><span class="at">Blocked Days</span><span class="st">`</span>, Latitude, Longitude, Active, <span class="st">`</span><span class="at">Airbnb Property ID</span><span class="st">`</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Airbnb Host ID</span><span class="st">`</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">`</span><span class="at">Property ID</span><span class="st">`</span>, <span class="st">`</span><span class="at">Listing Title</span><span class="st">`</span>, <span class="st">`</span><span class="at">Listing Type</span><span class="st">`</span>, <span class="st">`</span><span class="at">Property Type</span><span class="st">`</span>, <span class="st">`</span><span class="at">Created Date</span><span class="st">`</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Last Scraped Date</span><span class="st">`</span>, <span class="st">`</span><span class="at">Average Daily Rate (USD)</span><span class="st">`</span>,<span class="st">`</span><span class="at">Annual Revenue LTM (USD)</span><span class="st">`</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Occupancy Rate LTM</span><span class="st">`</span>, <span class="st">`</span><span class="at">Number of Bookings LTM</span><span class="st">`</span>, <span class="st">`</span><span class="at">Max Guests</span><span class="st">`</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Calendar Last Updated</span><span class="st">`</span>, <span class="st">`</span><span class="at">Published Nightly Rate (USD)</span><span class="st">`</span>, <span class="st">`</span><span class="at">Minimum Stay</span><span class="st">`</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Count Reservation Days LTM</span><span class="st">`</span>, <span class="st">`</span><span class="at">Count Available Days LTM</span><span class="st">`</span>, <span class="st">`</span><span class="at">Count Blocked Days LTM</span><span class="st">`</span>,</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>         Amenities, Latitude, Longitude, License, <span class="st">`</span><span class="at">Airbnb Property ID</span><span class="st">`</span>, <span class="st">`</span><span class="at">Airbnb Host ID</span><span class="st">`</span>)</span></code></pre></div>
+<p>Pour rendre les données plus lisibles, nous renommons les variables</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mensuel <span class="ot">&lt;-</span> mensuel <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="st">&quot;id_propriete&quot;</span> <span class="ot">=</span> <span class="st">&quot;Property ID&quot;</span>, <span class="st">&quot;type&quot;</span> <span class="ot">=</span> <span class="st">&quot;Listing Type&quot;</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;type_logement&quot;</span> <span class="ot">=</span> <span class="st">&quot;Property Type&quot;</span>, <span class="st">&quot;mois&quot;</span> <span class="ot">=</span> <span class="st">&quot;Reporting Month&quot;</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;revenus_mois&quot;</span> <span class="ot">=</span> <span class="st">&quot;Revenue (USD)&quot;</span>, <span class="st">&quot;revenus_nuitee&quot;</span> <span class="ot">=</span> <span class="st">&quot;ADR (USD)&quot;</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;nb_resa&quot;</span> <span class="ot">=</span> <span class="st">&quot;Number of Reservations&quot;</span>, <span class="st">&quot;nb_nuitees&quot;</span> <span class="ot">=</span> <span class="st">&quot;Reservation Days&quot;</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;nb_dispo&quot;</span> <span class="ot">=</span> <span class="st">&quot;Available Days&quot;</span>, <span class="st">&quot;nb_bloques&quot;</span> <span class="ot">=</span> <span class="st">&quot;Blocked Days&quot;</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;id_logement&quot;</span> <span class="ot">=</span> <span class="st">&quot;Airbnb Property ID&quot;</span>, <span class="st">&quot;id_hote&quot;</span> <span class="ot">=</span> <span class="st">&quot;Airbnb Host ID&quot;</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="st">&quot;id_propriete&quot;</span> <span class="ot">=</span> <span class="st">&quot;Property ID&quot;</span>, <span class="st">&quot;type_logement&quot;</span> <span class="ot">=</span> <span class="st">&quot;Property Type&quot;</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;id_hote&quot;</span> <span class="ot">=</span> <span class="st">&quot;Airbnb Host ID&quot;</span>, <span class="st">&quot;id_logement&quot;</span> <span class="ot">=</span> <span class="st">&quot;Airbnb Property ID&quot;</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;titre&quot;</span> <span class="ot">=</span> <span class="st">&quot;Listing Title&quot;</span>, <span class="st">&quot;type&quot;</span> <span class="ot">=</span> <span class="st">&quot;Listing Type&quot;</span>, <span class="st">&quot;debut&quot;</span> <span class="ot">=</span> <span class="st">&quot;Created Date&quot;</span>,</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;fin&quot;</span> <span class="ot">=</span> <span class="st">&quot;Last Scraped Date&quot;</span>, <span class="st">&quot;revenus_nuitee&quot;</span> <span class="ot">=</span> <span class="st">&quot;Average Daily Rate (USD)&quot;</span>,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;revenus_annee&quot;</span> <span class="ot">=</span> <span class="st">&quot;Annual Revenue LTM (USD)&quot;</span>, <span class="st">&quot;nb_resa_annee&quot;</span> <span class="ot">=</span> <span class="st">&quot;Number of Bookings LTM&quot;</span>,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;capacite&quot;</span> <span class="ot">=</span> <span class="st">&quot;Max Guests&quot;</span>, <span class="st">&quot;prix&quot;</span> <span class="ot">=</span> <span class="st">&quot;Published Nightly Rate (USD)&quot;</span>,</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;duree_min&quot;</span> <span class="ot">=</span> <span class="st">&quot;Minimum Stay&quot;</span>, <span class="st">&quot;nb_nuitees&quot;</span> <span class="ot">=</span> <span class="st">&quot;Count Reservation Days LTM&quot;</span>,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>         <span class="st">&quot;nb_dispo&quot;</span> <span class="ot">=</span> <span class="st">&quot;Count Available Days LTM&quot;</span>, <span class="st">&quot;nb_bloques&quot;</span> <span class="ot">=</span> <span class="st">&quot;Count Blocked Days LTM&quot;</span>)</span></code></pre></div>
+<p>Nous ne gardons que les logements et les chambres d’hôtel de la commune en question</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(hotels) <span class="ot">&lt;-</span> hotels[<span class="dv">1</span>, ]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>hotels <span class="ot">&lt;-</span> hotels <span class="sc">%&gt;%</span> <span class="fu">filter</span>(CODGEO <span class="sc">==</span> codeinsee)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>log_com <span class="ot">&lt;-</span> log_tot <span class="sc">%&gt;%</span> <span class="fu">filter</span>(insee <span class="sc">==</span> codeinsee)</span></code></pre></div>
+</div>
+<div id="sélection-des-lignes" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Sélection des lignes</h1>
+<p>Une fois les variables sélectionnées, nous passons par une processus de filtrage. En effet, des chambres d’hôtel se trouvent sur le site Airbnb. Dans certaines communes, il s’agit même d’une des modalités de la variable correspondant au type de logement (variable <strong>type</strong>). On supprime aussi les variables correpondants aux hôtels dans la colonne <strong>type_logement</strong> car certains d’entre eux sont considérés comme logements entiers. Cette dernière catégorie se décline en plusieurs dizaines de modalités car elle est plus précise et choisie arbitrairement par l’hôte.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(individuel<span class="sc">$</span>type)</span></code></pre></div>
+<pre><code>## 
+## Entire home/apt      Hotel room    Private room     Shared room 
+##            1487               5             347              39</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(individuel<span class="sc">$</span>type_logement)</span></code></pre></div>
+<pre><code>## 
+##                   apartment                   Apartment 
+##                           4                        1449 
+##             Bed &amp; Breakfast         Bed &amp;amp; Breakfast 
+##                           4                           3 
+##           Bed and breakfast                        Boat 
+##                           7                          20 
+##                    Building                        Cave 
+##                           1                           1 
+##                 Condominium         Corporate Apartment 
+##                         112                           1 
+##            Entire apartment                 Entire boat 
+##                          48                           3 
+##          Entire condominium                Entire house 
+##                           2                           3 
+##                 Entire loft                Entire place 
+##                           1                           2 
+##                 Guest suite                  Guesthouse 
+##                           3                           8 
+##                       hotel                       Hotel 
+##                           7                           2 
+##                       house                       House 
+##                           1                          86 
+##                  House Boat                   Houseboat 
+##                           2                           9 
+##                      Island                        Loft 
+##                           1                           6 
+##                Private room   Private room in apartment 
+##                           1                          17 
+## Private room in condominium  Private room in guesthouse 
+##                           1                           2 
+##                      Resort          Room in aparthotel 
+##                           1                           9 
+##      Room in boutique hotel               Room in hotel 
+##                          11                           1 
+##          Serviced apartment    Shared room in apartment 
+##                          28                           2 
+##                      studio                      Studio 
+##                           1                           4 
+##                   Timeshare                  Tiny house 
+##                           1                           1 
+##                   Townhouse                       Villa 
+##                           7                           4</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On supprime ensuite les annonces correspondant à des chambres d&#39;hôtel </span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>mensuel <span class="ot">&lt;-</span> mensuel <span class="sc">%&gt;%</span> <span class="fu">filter</span> (type <span class="sc">!=</span> <span class="st">&quot;Hotel room&quot;</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>mensuel <span class="ot">&lt;-</span> mensuel <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">hotel =</span> <span class="fu">str_detect</span>(type_logement, <span class="at">pattern =</span> <span class="st">&quot;hotel&quot;</span>),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">hotel2 =</span> <span class="fu">str_detect</span>(type_logement, <span class="at">pattern =</span> <span class="st">&quot;Hotel&quot;</span>))</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>mensuel <span class="ot">&lt;-</span> mensuel <span class="sc">%&gt;%</span> <span class="fu">filter</span>(hotel <span class="sc">!=</span> <span class="cn">TRUE</span> <span class="sc">&amp;</span> hotel2 <span class="sc">!=</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>mensuel <span class="ot">&lt;-</span> mensuel <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>hotel, <span class="sc">-</span>hotel2, <span class="sc">-</span>type_logement)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span> <span class="fu">filter</span> (type <span class="sc">!=</span> <span class="st">&quot;Hotel room&quot;</span>)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">hotel =</span> <span class="fu">str_detect</span>(type_logement, <span class="at">pattern =</span> <span class="st">&quot;hotel&quot;</span>),</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>                              <span class="at">hotel2 =</span> <span class="fu">str_detect</span>(type_logement, <span class="at">pattern =</span> <span class="st">&quot;Hotel&quot;</span>))</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span> <span class="fu">filter</span>(hotel <span class="sc">!=</span> <span class="cn">TRUE</span> <span class="sc">&amp;</span> hotel2 <span class="sc">!=</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>hotel, <span class="sc">-</span>hotel2, <span class="sc">-</span>type_logement)</span></code></pre></div>
+<p>Après suppression des chambres d’hôtel, le nombre total d’observations passe de 47817 à 47210. Sur les 1878 annonces mises en ligne, cela n’en représente que 31.</p>
+<p>En plus des chambres d’hôtel, on trouve aussi des logements HomeAway sur les tableaux de données fournis par Airdna. D’une part, le sujet d’étude est Airbnb, et d’autre part ils sont à l’origine de nombreuses valeurs non attribuées dans nos tableaux : en parcourant le tableau, on se rend compte que les <em>NA</em> dans les variables <strong>id_logement</strong> et <strong>id_hote</strong> correspondent à des logements HomeAway (ceux pour lesquels la variable <strong>id_propriete</strong> commence par les lettres “ha”). On supprime alors des deux tableaux les lignes correspondant à un identifiant autre que celui associé au site airbnb.com.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(id_logement))</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>mensuel <span class="ot">&lt;-</span> mensuel <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(id_logement))</span></code></pre></div>
+<p>Cette même variable <strong>id_logement</strong> désigne l’identifiant unique pour chaque logement. Une simple vérification permet d’affirmer qu’il n’y a pas de doublon.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On cherche la fréquence d&#39;occurence de chaque identifiant de logement </span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>verif <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">table</span>(individuel<span class="sc">$</span>id_propriete))</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(verif<span class="sc">$</span>Freq)</span></code></pre></div>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##       1       1       1       1       1       1</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On peut maintenant supprimer cette variable car on a la colonne id_logement qui est similaire</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>id_propriete)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>mensuel <span class="ot">&lt;-</span> mensuel <span class="sc">%&gt;%</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>id_propriete)</span></code></pre></div>
+</div>
+<div id="traitement-des-valeurs-non-attribuées" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Traitement des valeurs non attribuées</h1>
+<p>Les variables non attribuées sont représentées par un NA dans le tableau de données. La fonction <em>is.na</em> nous permet de les retrouver facilement, et il est possible via la fonction f écrite précédemment d’en compter le pourcentage par colonne. Il existe plusieurs cas de figure de valeurs <em>NA</em>, et différentes façon de les remplacer spécifiques à ces causes :</p>
+<ul>
+<li><p>Il s’agit de données manquantes et indépendantes, auquel cas il est difficile de les estimer. Une solution serait de supprimer les lignes correspondant à ces valeurs manquantes, si elles représentent une part infime des observations. La première phase de sélection des colonnes a permis de se débarasser de beaucoup de valeurs non attribuées.</p></li>
+<li><p>Il s’agit de données manquantes liées à une ou plusieurs autres variables. Dans ce cas de figure, il est possible de réestimer cette valeur en fonction d’une autre variable (par exemple estimer le prix en fonction du revenu).</p></li>
+</ul>
+<p>Il est nécessaire de bien faire la distinction entre les mécanismes de production des données manquantes afin de faire le juste choix de traitement car cela pourrait influencer les résultats des analyses statistiques en y implémentant de possibles biais. En effet, remplacer des valeurs non attribuées par des 0 pourrait avoir un impact plus ou moins considérables selon le nombre d’observations. La détection des valeurs manquantes ainsi que le détermination de la cause de leur présence représente donc un enjeu car la méthode d’imputation (de remplacement) dépendra de cette analyse. Par exemple, dans notre cas de figure, remplacer les valeurs non attribuées correspondant aux revenus d’un logement par des 0 n’aurait pas de sens si le logement n’a jamais été loué. On préferera par conséquent laisser les valeurs non attribuées pour ne pas fausser les analyses statistiques.</p>
+<p>Ainsi, le remplacement des valeurs non attribuées se fait en deux étapes : il faut d’abord chercher le mécanisme d’apparition de ces valeurs (si la valeur manquante dépend ou non d’une autre variable ou s’il existe d’autres causes de l’ordre du temporel par exemple), pour ensuite choisir la méthode d’imputation, sans oublier de sélectionner seulement les observations que l’on souhaite transformer. Après sélection des colonnes et filtrage des lignes, le tableau descriptif ressemble donc à ceci :</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On va compter les NA dans chaque colonne en appelant la fonction</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(individuel,f))</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(df, <span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Nombre de valeurs uniques
+</th>
+<th style="text-align:right;">
+Nombre de 0
+</th>
+<th style="text-align:right;">
+Nombre de valeurs NA
+</th>
+<th style="text-align:right;">
+Pourcentage de valeurs NA
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+titre
+</td>
+<td style="text-align:right;">
+1733
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+type
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+debut
+</td>
+<td style="text-align:right;">
+988
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fin
+</td>
+<td style="text-align:right;">
+717
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+revenus_nuitee
+</td>
+<td style="text-align:right;">
+438
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1301
+</td>
+<td style="text-align:right;">
+73.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+revenus_annee
+</td>
+<td style="text-align:right;">
+456
+</td>
+<td style="text-align:right;">
+1301
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Occupancy Rate LTM
+</td>
+<td style="text-align:right;">
+321
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1301
+</td>
+<td style="text-align:right;">
+73.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nb_resa_annee
+</td>
+<td style="text-align:right;">
+57
+</td>
+<td style="text-align:right;">
+1347
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+capacite
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Calendar Last Updated
+</td>
+<td style="text-align:right;">
+836
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+224
+</td>
+<td style="text-align:right;">
+12.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+prix
+</td>
+<td style="text-align:right;">
+260
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+106
+</td>
+<td style="text-align:right;">
+6.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+duree_min
+</td>
+<td style="text-align:right;">
+28
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nb_nuitees
+</td>
+<td style="text-align:right;">
+137
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1301
+</td>
+<td style="text-align:right;">
+73.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nb_dispo
+</td>
+<td style="text-align:right;">
+150
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1301
+</td>
+<td style="text-align:right;">
+73.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nb_bloques
+</td>
+<td style="text-align:right;">
+99
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1301
+</td>
+<td style="text-align:right;">
+73.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Amenities
+</td>
+<td style="text-align:right;">
+1632
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+1.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Latitude
+</td>
+<td style="text-align:right;">
+1486
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Longitude
+</td>
+<td style="text-align:right;">
+1633
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+License
+</td>
+<td style="text-align:right;">
+98
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1664
+</td>
+<td style="text-align:right;">
+94.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+id_logement
+</td>
+<td style="text-align:right;">
+1765
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+id_hote
+</td>
+<td style="text-align:right;">
+1526
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(mensuel,f))</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(df, <span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Nombre de valeurs uniques
+</th>
+<th style="text-align:right;">
+Nombre de 0
+</th>
+<th style="text-align:right;">
+Nombre de valeurs NA
+</th>
+<th style="text-align:right;">
+Pourcentage de valeurs NA
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+type
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+mois
+</td>
+<td style="text-align:right;">
+64
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Occupancy Rate
+</td>
+<td style="text-align:right;">
+310
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3596
+</td>
+<td style="text-align:right;">
+8.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+revenus_mois
+</td>
+<td style="text-align:right;">
+6304
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+6958
+</td>
+<td style="text-align:right;">
+15.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+revenus_nuitee
+</td>
+<td style="text-align:right;">
+6091
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+32470
+</td>
+<td style="text-align:right;">
+72.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nb_resa
+</td>
+<td style="text-align:right;">
+26
+</td>
+<td style="text-align:right;">
+32846
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nb_nuitees
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+32470
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nb_dispo
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+25096
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nb_bloques
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+12042
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Latitude
+</td>
+<td style="text-align:right;">
+1486
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Longitude
+</td>
+<td style="text-align:right;">
+1633
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Active
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+28620
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+id_logement
+</td>
+<td style="text-align:right;">
+1765
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+id_hote
+</td>
+<td style="text-align:right;">
+1526
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+</tr>
+</tbody>
+</table>
+<p>Certaines variables seront nécessaires à nos analyses et on ne peut pas se permettre d’avoir des valeurs non attribuées dans ces colonnes. On décide alors de supprimer les observations pour lesquelles la capacité n’est pas attribuée car cela nous empêche de calculer le prix par personne</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(individuel<span class="sc">$</span>capacite))</span></code></pre></div>
+<p>Au niveau de la variable <strong>License</strong>, on peut remplacer les observations par des valeurs <em>logical</em> qui prendraient les valeurs TRUE si l’hôte a une licence ou FALSE s’il n’en possède pas. On part du principe qu’une valeur <em>NA</em> dans la colonne <strong>License</strong> équivaut à un hôte qui n’a pas de licence.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>individuel<span class="sc">$</span>licence <span class="ot">=</span> <span class="cn">FALSE</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>individuel<span class="sc">$</span>licence[<span class="fu">which</span>(<span class="sc">!</span><span class="fu">is.na</span>(individuel<span class="sc">$</span>License))] <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span></code></pre></div>
+<p>En ce qui concerne le tableau individuel, les NA dans les colonnes relatives à la fréquentation et aux revenus (<strong>revenus_nuitee</strong>, <strong>Occupancy Rate LTM</strong>, <strong>nb_dispo</strong>, <strong>nb_nuitees</strong>, <strong>nb_bloques</strong>) sont issues de la temporalité des variables : elles sont agrégées sur l’année passée. Notre hypothèse est la suivante : ces logements n’ont pas engrangé de visites sur cette année et les valeurs NA correspondent à une absence de données dûes à des réservations nulles. On préfère garder ces lignes car transformer les NA en 0 inclurait un biais dans les calculs.</p>
+<p>Au vu de la temporalité du scraping, les valeurs non attribuées de ces variables pourraient être dues à des logements dont le dernier scraping remonte à plus d’un an (date d’extinction du logement). On décide pour les logements dont le dernier scraping remonte à + d’un an de laisser les valeurs en <em>NA</em> pour ne pas fausser les analyses statistiques. Le dernier scraping en date remonte au mois de décembre 2020. Ainsi, on ne sélectionne que les logements ayant été scrapés entre décembre 2019 et décembre 2020 afin d’en étudier les valeurs NA.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>scrapes <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span> <span class="fu">filter</span>(fin <span class="sc">&gt;</span> <span class="st">&quot;2019/12/01&quot;</span> <span class="sc">&amp;</span> <span class="fu">is.na</span>(revenus_nuitee))</span></code></pre></div>
+<p>Sur les 1295 logements aux modalités non attribuées, 932 ont été scrapés pour la dernière fois il y a plus d’un an. On ne touche pas ces lignes et on examine les 363 restantes, qui ont été scrapés durant les 12 derniers mois mais qui comportent des valeurs NA.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(scrapes[<span class="dv">13</span><span class="sc">:</span><span class="dv">15</span>])</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 3
+##   nb_nuitees nb_dispo nb_bloques
+##        &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;
+## 1         NA       NA         NA
+## 2         NA       NA         NA
+## 3         NA       NA         NA
+## 4         NA       NA         NA
+## 5         NA       NA         NA
+## 6         NA       NA         NA</code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(scrapes<span class="sc">$</span>nb_resa_annee)</span></code></pre></div>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##  0.0000  0.0000  0.0000  0.2121  0.0000 10.0000</code></pre>
+<p>On remarque que pour la plupart des observations, le nombre de réservation est nul. Comme pour le tableau précédent, cela pourrait expliquer les valeurs manquantes. Sur les 363 observations, 343 correspondent à un nombre de réservation nul. Pour 20 logements, le nombre de nuitées réservées, disponibles et bloquées ainsi que les revenus ne sont pas spécifiés bien qu’ils aient été réservés. Après vérification, il s’agit de 20 logements différents, qui n’ont visiblement rien en commun. Cette anomalie vient peut être du fait que ces logements ont été réservés il y a à peu près un an entre deux scrapings et que les nuitées réservées se sont faites à cheval entre avant et après la limite d’il y a un an jour pour jour.</p>
+<div id="remplacement-suppression-des-valeurs-na" class="section level2" number="4.1">
+<h2 number="4.1"><span class="header-section-number">4.1</span> Remplacement / suppression des valeurs <em>NA</em> :</h2>
+<p>Comme vu précédemment, la plupart des valeurs NA sont dues à des valeurs manquantes. En effet, les colonnes contenant des valeurs non attribuées font partie du second cas de figure, ou les variables sont dépendantes d’autres variables, ce qui pourrait expliquer les valeurs manquantes. On décide donc de les garder pour la suite de nos analyses, plutôt que de les remplacer par des 0. Deux mystères persistent : les 932 observations non attribuées dans les colonnes relevant à la fréquentation et aux revenus correspondant à un nombre de réservation positifs, ainsi que les 106 situés dans la colonne <strong>prix</strong>.</p>
+<p>On supprime les 20 observations</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>toto <span class="ot">&lt;-</span> scrapes <span class="sc">%&gt;%</span> <span class="fu">filter</span>(nb_resa_annee <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel[<span class="sc">!</span>(individuel<span class="sc">$</span>id_logement <span class="sc">%in%</span> toto<span class="sc">$</span>id_logement),]</span></code></pre></div>
+<p>Pour les observations pour lesquelles le prix n’est pas affiché, il est possible de l’estimer à l’aide du revenu par nuitée. En effet, on peut émettre l’hypothèse que ces variables sont liées car le calcul du revenu se fait en fonction du prix. Pour cela, on trace la droite de régression entre le prix et le revenu et on calcule l’équation correspondante.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On choisit d&#39;abord des logements ayant des revenus recensés et non nuls</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>revenus <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(revenus_nuitee <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(revenus_nuitee) <span class="sc">&amp;</span>  <span class="sc">!</span><span class="fu">is.na</span>(prix))</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="co"># On trace le nuage de points </span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="co"># On passe par un modèle log-log à cause des valeurs extrêmes</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">log</span>(revenus<span class="sc">$</span>revenus_nuitee) <span class="co"># variable explicative</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">log</span>(revenus<span class="sc">$</span>prix) <span class="co"># variable dépendante</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>corlin <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">cor</span>(x,y),<span class="dv">3</span>)</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>reglin <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x)</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x,y, <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">&quot;Coeff Pearson = &quot;</span>, corlin))<span class="sc">+</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(reglin,<span class="at">col=</span><span class="st">&quot;red&quot;</span>)</span></code></pre></div>
+<pre><code>## integer(0)</code></pre>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On cherche à calculer le coefficient de corrélation ainsi que l&#39;équation de la droite</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(reglin)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = y ~ x)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.35356 -0.05801  0.01911  0.08070  1.50897 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  0.28986    0.08440   3.434 0.000658 ***
+## x            0.91934    0.01846  49.811  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.2123 on 390 degrees of freedom
+## Multiple R-squared:  0.8642, Adjusted R-squared:  0.8638 
+## F-statistic:  2481 on 1 and 390 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p><img src="prepadonnees_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<p>On observe une forte relation linéaire positive entre le prix et le revenu avec un coefficient de détermination R2 de 0.8641631. La p-value très faible permet d’affirmer le lien entre prix et revenu. L’interprétation de la droite de régression est la suivante : log(<strong>prix</strong>) = 0.2898591 + (0.9193377 x log(<strong>revenus_nuitees</strong>)). En français, cela signifie qu’une augmentation du revenu de 1% multiplie le prix par e^<sup>0.9193377 x log(1.01)</sup>, et donc entraine une augmentation du prix de l’ordre de 1.0091897$.</p>
+<p>Il est nécessaire de repasser à l’échelle linéaire à l’aide d’une exponentielle. La formule pour estimer le prix est donc la suivante :</p>
+<ul>
+<li><strong>prix</strong> = <strong>revenus_nuitee</strong>^<sup>0.9193377</sup> x 1.3362393 avec une qualité d’ajustement r² de 0.8641631.</li>
+</ul>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="ot">&lt;-</span> individuel[<span class="fu">is.na</span>(individuel<span class="sc">$</span>prix),]</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>tmp <span class="ot">&lt;-</span> tmp[tmp<span class="sc">$</span>revenus_nuitee <span class="sc">&gt;</span> <span class="dv">0</span>,]</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>tmp<span class="sc">$</span>estim <span class="ot">&lt;-</span> (tmp<span class="sc">$</span>revenus_nuitee<span class="sc">^</span>(reglin<span class="sc">$</span>coeff[<span class="dv">2</span>])) <span class="sc">*</span> <span class="fu">exp</span>(reglin<span class="sc">$</span>coeff[<span class="dv">1</span>])</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> <span class="fu">merge</span>(individuel, tmp, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Imputation</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>individuel<span class="sc">$</span>prix <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(individuel<span class="sc">$</span>prix), individuel<span class="sc">$</span>estim, individuel<span class="sc">$</span>prix)</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>individuel<span class="sc">$</span>prix <span class="ot">&lt;-</span> individuel<span class="sc">$</span>prix <span class="sc">%&gt;%</span> <span class="fu">round</span>(<span class="at">digits =</span> <span class="dv">0</span>)</span></code></pre></div>
+<p>Un biais est inhérent à cette méthode : lorsque l’Average Daily Rate est nul, on ne peut pas calculer le prix de la nuitée. Ainsi, le prix n’est pas spécifié pour 30 observations. Cela représente 1.7% du nombre total de lignes. S’agit-il alors de valeurs manquantes ? On décide de supprimer ces 30 logements.</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(prix))</span></code></pre></div>
+<p>Une fois le tableau individuel nettoyé, on supprime les lignes correspondantes dans le tableau mensuel à l’aide de la colonne <strong>id_logement</strong>.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>mensuel <span class="ot">&lt;-</span> mensuel[(mensuel<span class="sc">$</span>id_logement <span class="sc">%in%</span> individuel<span class="sc">$</span>id_logement),]</span></code></pre></div>
+</div>
+</div>
+<div id="critique-des-variables" class="section level1" number="5">
+<h1 number="5"><span class="header-section-number">5</span> Critique des variables</h1>
+<p>Selon leur <a href="https://www.airdna.co/airdna-data-how-it-works">site internet</a>, plus de 90% des données sont scrapées par airdna, tandis que le reste vient de partenaires et des hôtes eux-même. Les sources diffèrent, ainsi que les méthodologies utilisées pour récolter les données.</p>
+<p>On relève deux principales remarques plus ou moins embêtantes :</p>
+<ul>
+<li><p>Le prix : la variable correspondant au prix est arrêtée en date de décembre 2020. Il est donc fixe, or on sait qu’il est soumis à des variations, notamment en période touristique. Le tableau mensuel ne présente pas de variables correspondant au prix. Il est possible via une jointure de faire correspondre le prix d’un logement sur ce second tableau, mais il ne correspondra pas forcément au prix réel affiché à la date du mois scrapé.</p></li>
+<li><p>Au niveau de la méthodologie de récolte des données, on observe que les modalités correspondant à des revenus nul sont codées à l’aide de valeurs NA d’août 2015 à juin 2017, puis à l’aide de 0 par la suite. Il s’agit sans d’août d’un changement dans la méthode de calcul que l’on doit harmoniser</p></li>
+</ul>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>avantjuillet <span class="ot">&lt;-</span> mensuel <span class="sc">%&gt;%</span> <span class="fu">filter</span>(mois <span class="sc">&lt;</span> <span class="st">&quot;2017-07-01&quot;</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>apresjuillet <span class="ot">&lt;-</span> mensuel <span class="sc">%&gt;%</span> <span class="fu">filter</span>(mois <span class="sc">&gt;=</span> <span class="st">&quot;2017-07-01&quot;</span>)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(avantjuillet,f))</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df[<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>, ]</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(df, <span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Nombre de valeurs uniques
+</th>
+<th style="text-align:right;">
+Nombre de 0
+</th>
+<th style="text-align:right;">
+Nombre de valeurs NA
+</th>
+<th style="text-align:right;">
+Pourcentage de valeurs NA
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Occupancy Rate
+</td>
+<td style="text-align:right;">
+295
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3582
+</td>
+<td style="text-align:right;">
+35.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+revenus_mois
+</td>
+<td style="text-align:right;">
+2211
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+6935
+</td>
+<td style="text-align:right;">
+68.8
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(apresjuillet,f))</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df[<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>, ]</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(df, <span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Nombre de valeurs uniques
+</th>
+<th style="text-align:right;">
+Nombre de 0
+</th>
+<th style="text-align:right;">
+Nombre de valeurs NA
+</th>
+<th style="text-align:right;">
+Pourcentage de valeurs NA
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Occupancy Rate
+</td>
+<td style="text-align:right;">
+309
+</td>
+<td style="text-align:right;">
+24950
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+revenus_mois
+</td>
+<td style="text-align:right;">
+5202
+</td>
+<td style="text-align:right;">
+24880
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hypothèse : ils ont été remplacés par des 0 à partir de juillet 2017 dans la méthode de calcul</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="co"># On vérifie que les NA avant juillet correspondent à 0 réservations</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>na <span class="ot">&lt;-</span> avantjuillet <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(revenus_mois))</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(na<span class="sc">$</span>nb_resa)</span></code></pre></div>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##       0       0       0       0       0       0</code></pre>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On harmonise donc la méthode</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>mensuel<span class="sc">$</span>revenus_mois[<span class="fu">which</span>(<span class="fu">is.na</span>(mensuel<span class="sc">$</span>revenus_mois) <span class="sc">&amp;</span> mensuel<span class="sc">$</span>mois <span class="sc">&lt;</span> <span class="st">&quot;2017-07-01&quot;</span>)] <span class="ot">&lt;-</span> <span class="dv">0</span></span></code></pre></div>
+<p>Il en est de même pour la colonne <strong>Occupancy Rate</strong>, à la différence que les données avant juillet 2017 comprennent à la fois des 0 et des NA pour des taux de réservation nuls, tandis que les données post-juillet 2017 ne contiennent que des 0 dans cette colonne. On ne modifie pas cette colonne car la variable <strong>tauxfreq</strong> sera créée.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On vérifie si c&#39;est vrai</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> avantjuillet <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(<span class="st">`</span><span class="at">Occupancy Rate</span><span class="st">`</span>))</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(test<span class="sc">$</span>nb_resa)</span></code></pre></div>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##       0       0       0       0       0       0</code></pre>
+</div>
+<div id="création-de-nouvelles-variables" class="section level1" number="6">
+<h1 number="6"><span class="header-section-number">6</span> Création de nouvelles variables</h1>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># prix par personne</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">prixpers =</span> prix<span class="sc">/</span>capacite)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>individuel<span class="sc">$</span>prixpers <span class="ot">&lt;-</span> <span class="fu">round</span>(individuel<span class="sc">$</span>prixpers, <span class="at">digits =</span> <span class="dv">0</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="co"># durée des séjours</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>mensuel<span class="sc">$</span>duree <span class="ot">&lt;-</span> mensuel<span class="sc">$</span>nb_nuitees <span class="sc">/</span> mensuel<span class="sc">$</span>nb_resa</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a><span class="co"># ancienneté sur le marché airbnb</span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> individuel <span class="sc">%&gt;%</span> </span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">anciennete =</span> (fin <span class="sc">-</span> debut)<span class="sc">/</span><span class="dv">365</span><span class="sc">*</span><span class="dv">12</span>)</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>individuel<span class="sc">$</span>anciennete <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(individuel<span class="sc">$</span>anciennete)</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a><span class="co"># avoir le jour, le mois et l&#39;année sur le tableau mensuel</span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>mensuel <span class="ot">&lt;-</span> mensuel <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">year =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(mois),</span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>                              <span class="at">month =</span> <span class="fu">format</span>(mois, <span class="at">format =</span> <span class="st">&quot;%m&quot;</span>),</span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a>                              <span class="at">day =</span> lubridate<span class="sc">::</span><span class="fu">day</span>(mois))</span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a><span class="co"># taux de fréquentation</span></span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a>mensuel<span class="sc">$</span>tauxfreq <span class="ot">&lt;-</span> mensuel<span class="sc">$</span>nb_nuitees <span class="sc">/</span> (mensuel<span class="sc">$</span>nb_nuitees <span class="sc">+</span> mensuel<span class="sc">$</span>nb_dispo)</span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a>mensuel<span class="sc">$</span>tauxfreq <span class="ot">&lt;-</span> mensuel<span class="sc">$</span>tauxfreq <span class="sc">%&gt;%</span> <span class="fu">round</span>(<span class="at">digits =</span> <span class="dv">2</span>)</span>
+<span id="cb45-22"><a href="#cb45-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-23"><a href="#cb45-23" aria-hidden="true" tabindex="-1"></a>individuel<span class="sc">$</span>tauxfreq <span class="ot">&lt;-</span> individuel<span class="sc">$</span>nb_nuitees <span class="sc">/</span> (individuel<span class="sc">$</span>nb_nuitees <span class="sc">+</span> individuel<span class="sc">$</span>nb_dispo)</span>
+<span id="cb45-24"><a href="#cb45-24" aria-hidden="true" tabindex="-1"></a>individuel<span class="sc">$</span>tauxfreq <span class="ot">&lt;-</span> individuel<span class="sc">$</span>tauxfreq <span class="sc">%&gt;%</span> <span class="fu">round</span>(<span class="at">digits =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p>Pour trouver les multiloueurs :</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On calcule la fréquence d&#39;occurrence de chaque identifiant d&#39;hôte</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>nb_prop <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">table</span>(individuel<span class="sc">$</span>id_hote), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(nb_prop) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;id_hote&quot;</span>,<span class="st">&quot;Freq&quot;</span>)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="co"># On sépare ensuite les identifiants apparaissant une fois et ceux apparaissant plusieurs fois</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>mono <span class="ot">&lt;-</span> nb_prop[nb_prop<span class="sc">$</span>Freq <span class="sc">==</span> <span class="dv">1</span>,]</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>multi <span class="ot">&lt;-</span> nb_prop[nb_prop<span class="sc">$</span>Freq <span class="sc">&gt;=</span> <span class="dv">2</span>,]</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a><span class="co"># On y joint ensuite les caractéristiques correspondantes</span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>mono <span class="ot">&lt;-</span> <span class="fu">merge</span>(mono,individuel, <span class="at">by =</span> <span class="st">&quot;id_hote&quot;</span>)</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>multi <span class="ot">&lt;-</span> <span class="fu">merge</span>(multi,individuel, <span class="at">by =</span> <span class="st">&quot;id_hote&quot;</span>)</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> <span class="fu">rbind</span>(multi,mono)</span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> <span class="fu">mutate</span>(individuel,</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">multi =</span> <span class="fu">case_when</span>(</span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>                       individuel<span class="sc">$</span>Freq <span class="sc">&gt;</span> <span class="dv">1</span> <span class="sc">~</span> <span class="cn">TRUE</span>,</span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>                       individuel<span class="sc">$</span>Freq <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="cn">FALSE</span></span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a>                     ))</span></code></pre></div>
+<p>On a donc 179 multiloueurs qui se partagent 402 logements.</p>
+<p>Etablir une typologie des logements selon les réservations :</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>group <span class="ot">&lt;-</span> mensuel <span class="sc">%&gt;%</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(id_logement) <span class="sc">%&gt;%</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">nb_nuitees_tot =</span> <span class="fu">sum</span>(nb_nuitees), <span class="at">nb_dispo_tot =</span> <span class="fu">sum</span>(nb_dispo),</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">nb_bloques_tot =</span> <span class="fu">sum</span>(nb_bloques), <span class="at">nb_resa_tot =</span> <span class="fu">sum</span>(nb_resa))</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a><span class="co"># On peut ensuite merger ces colonnes au tableau annuel via la colonne id_logement</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> <span class="fu">merge</span>(individuel, group, <span class="at">by.x =</span> <span class="st">&quot;id_logement&quot;</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>individuel <span class="ot">&lt;-</span> <span class="fu">mutate</span>(individuel,</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">activite =</span> <span class="fu">case_when</span>(</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>      individuel<span class="sc">$</span>nb_dispo_tot <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> individuel<span class="sc">$</span>nb_nuitees_tot <span class="sc">==</span> <span class="dv">0</span> <span class="sc">~</span> <span class="st">&quot;Jamais proposé&quot;</span>,</span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>      individuel<span class="sc">$</span>nb_dispo_tot <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> individuel<span class="sc">$</span>nb_nuitees_tot <span class="sc">==</span> <span class="dv">0</span> <span class="sc">~</span> <span class="st">&quot;Proposé, jamais réservé&quot;</span>,</span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>      individuel<span class="sc">$</span>nb_nuitees_tot <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">~</span> <span class="st">&quot;Réservé&quot;</span></span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>                     ))</span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a><span class="co"># sur le tableau mensuel</span></span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>mensuel <span class="ot">&lt;-</span> <span class="fu">mutate</span>(mensuel,</span>
+<span id="cb47-17"><a href="#cb47-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">activite =</span> <span class="fu">case_when</span>(</span>
+<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a>      mensuel<span class="sc">$</span>nb_dispo <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> mensuel<span class="sc">$</span>nb_nuitees <span class="sc">==</span> <span class="dv">0</span> <span class="sc">~</span> <span class="st">&quot;Mois non disponibles&quot;</span>,</span>
+<span id="cb47-19"><a href="#cb47-19" aria-hidden="true" tabindex="-1"></a>      mensuel<span class="sc">$</span>nb_dispo <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> mensuel<span class="sc">$</span>nb_nuitees <span class="sc">==</span> <span class="dv">0</span> <span class="sc">~</span> <span class="st">&quot;Mois disponibles mais sans réservation&quot;</span>,</span>
+<span id="cb47-20"><a href="#cb47-20" aria-hidden="true" tabindex="-1"></a>      mensuel<span class="sc">$</span>nb_nuitees <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">~</span> <span class="st">&quot;Mois avec réservation&quot;</span></span>
+<span id="cb47-21"><a href="#cb47-21" aria-hidden="true" tabindex="-1"></a>                     ))</span>
+<span id="cb47-22"><a href="#cb47-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-23"><a href="#cb47-23" aria-hidden="true" tabindex="-1"></a><span class="co"># On crée la colonne actif car la colonne Active ne correspond pas forcément </span></span>
+<span id="cb47-24"><a href="#cb47-24" aria-hidden="true" tabindex="-1"></a>mensuel <span class="ot">&lt;-</span> <span class="fu">mutate</span>(mensuel,</span>
+<span id="cb47-25"><a href="#cb47-25" aria-hidden="true" tabindex="-1"></a>                  <span class="at">actif =</span> <span class="fu">case_when</span>(</span>
+<span id="cb47-26"><a href="#cb47-26" aria-hidden="true" tabindex="-1"></a>                    mensuel<span class="sc">$</span>nb_dispo <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">~</span> <span class="cn">TRUE</span>,</span>
+<span id="cb47-27"><a href="#cb47-27" aria-hidden="true" tabindex="-1"></a>                    mensuel<span class="sc">$</span>nb_dispo <span class="sc">==</span> <span class="dv">0</span> <span class="sc">~</span> <span class="cn">FALSE</span></span>
+<span id="cb47-28"><a href="#cb47-28" aria-hidden="true" tabindex="-1"></a>                  ))</span></code></pre></div>
+<p>Une fois les tableaux mis au propre, on les renomme avant de passer aux opérations de jointure.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>individuel_clean <span class="ot">&lt;-</span> individuel</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>mensuel_clean <span class="ot">&lt;-</span> mensuel</span></code></pre></div>
+<p>En conclusion, on passe d’un tableau brut de 1878 lignes et 70 colonnes à un tableau consolidé de 1707 lignes pour 33 colonnes. 2 variables (le prix et la licence) ont été modifiées afin de remplacer les valeurs non attribuées sur le tableau individuel et une sur le tableau mensuel (le revenu mensuel). Toujours sur le tableau mensuel, 6 variables ont été crées à partir des variables déjà existantes , et 5 sur le tableau individuel. Parmi elles, le prix par personne, la durée des séjours, l’ancienneté sur le marché Airbnb, la décomposition de la date, une réestimation du taux de fréquentation, le profil de l’hôte (multiloueur/monoloueur) ainsi que la typologie des logements selon leurs réservations. Les nouvelles variables sont documentées dans le tableau suivant :</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>newvar <span class="ot">&lt;-</span> <span class="fu">read_xls</span>(<span class="st">&quot;meta/newvar.xls&quot;</span>)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(newvar) <span class="sc">%&gt;%</span> <span class="fu">kable_paper</span>()</span></code></pre></div>
+<table class=" lightable-paper" style="font-family: &quot;Arial Narrow&quot;, arial, helvetica, sans-serif; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Variable
+</th>
+<th style="text-align:left;">
+Tableau
+</th>
+<th style="text-align:left;">
+Méthodologie
+</th>
+<th style="text-align:left;">
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+activite
+</td>
+<td style="text-align:left;">
+Individuel
+</td>
+<td style="text-align:left;">
+« Jamais proposé » si le logement n’a jamais été disponible ni réservé, « Proposé, Jamais réservé » si le logement a été disponible mais non réservé, « Réservé » si le logement a été réservé
+</td>
+<td style="text-align:left;">
+Typologie d’un logement selon son activité : Jamais proposé, Proposé mais jamais réservé, Réservé au moins une fois
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+anciennete
+</td>
+<td style="text-align:left;">
+Individuel
+</td>
+<td style="text-align:left;">
+Date du dernier scraping – date de mise en ligne du logement (fin – debut)
+</td>
+<td style="text-align:left;">
+Nombre de mois depuis la mise en ligne de l’annonce sur le site Airbnb
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Freq
+</td>
+<td style="text-align:left;">
+Individuel
+</td>
+<td style="text-align:left;">
+fonction table() pour compter la fréquence d’occurence de chaque identifiant d’hôte
+</td>
+<td style="text-align:left;">
+Dénombre le nombre de logements détenus par un hôte
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+licence
+</td>
+<td style="text-align:left;">
+Individuel
+</td>
+<td style="text-align:left;">
+TRUE si observation dans la variable License, FALSE si NA
+</td>
+<td style="text-align:left;">
+TRUE si l’hôte possède une licence, FALSE s’il n’en possède pas
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+multi
+</td>
+<td style="text-align:left;">
+Individuel
+</td>
+<td style="text-align:left;">
+TRUE si Freq &gt; 1, FALSE si Freq == 1
+</td>
+<td style="text-align:left;">
+TRUE si l’hôte possède plusieurs logements dans la commune, FALSE s’il n’en possède qu’un
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nb_bloques_tot
+</td>
+<td style="text-align:left;">
+Individuel
+</td>
+<td style="text-align:left;">
+Somme de toutes les nuitées bloquées via le tableau mensuel_clean
+</td>
+<td style="text-align:left;">
+Nombre de nuitées bloquées depuis la mise en ligne du logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nb_dispo_tot
+</td>
+<td style="text-align:left;">
+Individuel
+</td>
+<td style="text-align:left;">
+Somme de toutes les nuitées disponibles via le tableau mensuel_clean
+</td>
+<td style="text-align:left;">
+Nombre de nuitées disponibles depuis la mise en ligne du logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nb_nuitees_tot
+</td>
+<td style="text-align:left;">
+Individuel
+</td>
+<td style="text-align:left;">
+Somme de toutes les nuitées réservées via le tableau mensuel_clean
+</td>
+<td style="text-align:left;">
+Nombre de nuitées réservées depuis la mise en ligne du logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nb_resa_tot
+</td>
+<td style="text-align:left;">
+Individuel
+</td>
+<td style="text-align:left;">
+Somme du nombre de réservations via le tableau mensuel_clean
+</td>
+<td style="text-align:left;">
+Nombre de réservations depuis la mise en ligne du logement
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+actif
+</td>
+<td style="text-align:left;">
+Mensuel
+</td>
+<td style="text-align:left;">
+TRUE si nb_dispo &gt; 0, FALSE si nb_dispo == 0
+</td>
+<td style="text-align:left;">
+TRUE si le logement est considéré comma actif sur le mois, FALSE si non
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+activite
+</td>
+<td style="text-align:left;">
+Mensuel
+</td>
+<td style="text-align:left;">
+« Mois non disponible » si le logement n’a jamais été disponible ni réservé durant le mois scrapé, « Mois disponibles mais sans réservation » si le logement a été disponible mais non réservé durant le mois scrapé, « Mois avec réservation » si le logement a été réservé durant le mois scrapé
+</td>
+<td style="text-align:left;">
+Typologie d’un logement selon son activité mensuelle :Mois non disponibles, Mois disponibles mais sans réservation, Mois avec réservation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+day
+</td>
+<td style="text-align:left;">
+Mensuel
+</td>
+<td style="text-align:left;">
+Extraction du jour de la mensualité correspondante (colonne mois)
+</td>
+<td style="text-align:left;">
+Jour durant lequel le logement a été scrapé
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+duree
+</td>
+<td style="text-align:left;">
+Mensuel
+</td>
+<td style="text-align:left;">
+Nombre de nuitées réservées / Nombre de réservation
+</td>
+<td style="text-align:left;">
+Durée moyenne des séjours
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+month
+</td>
+<td style="text-align:left;">
+Mensuel
+</td>
+<td style="text-align:left;">
+Extraction du mois de la mensualité correspondante (colonne mois)
+</td>
+<td style="text-align:left;">
+Mois durant lequel le logement a été scrapé
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+year
+</td>
+<td style="text-align:left;">
+Mensuel
+</td>
+<td style="text-align:left;">
+Extraction de l’année de la mensualité correspondante (colonne mois)
+</td>
+<td style="text-align:left;">
+Année durant laquelle le logement a été scrapé
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tauxfreq
+</td>
+<td style="text-align:left;">
+Individuel &amp; Mensuel
+</td>
+<td style="text-align:left;">
+Nombre de nuitées réservées / Nombre de nuitées disponibles
+</td>
+<td style="text-align:left;">
+Taux de fréquentation du logement
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="couches-géographiques" class="section level1" number="7">
+<h1 number="7"><span class="header-section-number">7</span> Couches géographiques</h1>
+<p>Pour les opérations d’analyse spatiale, plusieurs couches géographiques seront requises. Nos tableaux de données seront eux aussi transformés en couches de points. Les fichiers importés ainsi que leurs sources sont les suivants :</p>
+<ul>
+<li>Communes (<a href="https://www.data.gouv.fr/fr/datasets/apur-communes-ile-de-france/">APUR</a>, 2013)</li>
+<li>IRIS (<a href="https://data.iledefrance.fr/explore/dataset/iris/information/">Plateforme open data de la Région Île de France</a>, 2020)</li>
+<li>Données carroyées de l’INSEE, 200m (<a href="https://www.insee.fr/fr/statistiques/4176305">INSEE</a>, 2015, pré-intersectée avec l’emprise géographique de l’Île-de-France car fichier très volumineux)</li>
+<li>Stations RATP d’Île-de-France (<a href="https://www.data.gouv.fr/fr/datasets/positions-geographiques-des-stations-du-reseau-ratp-ratp/">Groupe RATP</a>, 2021)</li>
+</ul>
+<p>Les fichiers sélectionnés sont tous limités à l’emprise de l’Île-de-France.</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf) <span class="co"># Manipulation de données spatiales</span></span></code></pre></div>
+<div id="importation" class="section level2" number="7.1">
+<h2 number="7.1"><span class="header-section-number">7.1</span> Importation</h2>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Commune</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>COM <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/raw/Communes_IDF.shp/Communes_IDF.shp&quot;</span>)</span></code></pre></div>
+<pre><code>## Reading layer `Communes_IDF&#39; from data source 
+##   `C:\Users\Ronan\Documents\github\riateTrain\2021_LAURIAN\data\raw\Communes_IDF.shp\Communes_IDF.shp&#39; 
+##   using driver `ESRI Shapefile&#39;
+## Simple feature collection with 1304 features and 36 fields
+## Geometry type: POLYGON
+## Dimension:     XY
+## Bounding box:  xmin: 1.446358 ymin: 48.1203 xmax: 3.559018 ymax: 49.24165
+## Geodetic CRS:  WGS 84</code></pre>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>COM <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(COM, <span class="at">crs =</span> <span class="dv">4326</span>)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="co"># sélection de la commune</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>COM <span class="ot">&lt;-</span> COM <span class="sc">%&gt;%</span> <span class="fu">filter</span>(C_INSEE <span class="sc">==</span> codeinsee)</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="co"># IRIS</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>IRIS_IDF <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/raw/IRIS_IDF/IRIS_IDF.shp&quot;</span>)</span></code></pre></div>
+<pre><code>## Reading layer `IRIS_IDF&#39; from data source 
+##   `C:\Users\Ronan\Documents\github\riateTrain\2021_LAURIAN\data\raw\IRIS_IDF\IRIS_IDF.shp&#39; 
+##   using driver `ESRI Shapefile&#39;
+## Simple feature collection with 5260 features and 7 fields
+## Geometry type: MULTIPOLYGON
+## Dimension:     XY
+## Bounding box:  xmin: 1.447285 ymin: 48.12054 xmax: 3.555614 ymax: 49.24131
+## Geodetic CRS:  WGS 84</code></pre>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>IRIS_IDF <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(IRIS_IDF, <span class="at">crs =</span> <span class="dv">4326</span>)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="co"># sélection des IRIS</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>iris <span class="ot">&lt;-</span> IRIS_IDF <span class="sc">%&gt;%</span> <span class="fu">filter</span>(insee_com <span class="sc">==</span> codeinsee)</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a><span class="co"># calculer la surface de chaque iris</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>iris<span class="sc">$</span>surface <span class="ot">&lt;-</span> <span class="fu">st_area</span>(iris)</span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a><span class="co"># en hectare</span></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>iris<span class="sc">$</span>surface <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(iris<span class="sc">$</span>surface)</span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>iris<span class="sc">$</span>surface <span class="ot">&lt;-</span> iris<span class="sc">$</span>surface <span class="sc">/</span> <span class="dv">10000</span></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a><span class="co"># grille de référence (IDF)</span></span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>grilleidf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/raw/grilleidf/grilleidf.shp&quot;</span>) <span class="co"># un tout petit peu long</span></span></code></pre></div>
+<pre><code>## Reading layer `grilleidf&#39; from data source 
+##   `C:\Users\Ronan\Documents\github\riateTrain\2021_LAURIAN\data\raw\grilleidf\grilleidf.shp&#39; 
+##   using driver `ESRI Shapefile&#39;
+## Simple feature collection with 73210 features and 39 fields
+## Geometry type: MULTIPOLYGON
+## Dimension:     XY
+## Bounding box:  xmin: 1.449699 ymin: 48.1206 xmax: 3.521048 ymax: 49.23852
+## Geodetic CRS:  WGS 84</code></pre>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>grilleidf <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(grilleidf, <span class="at">crs =</span> <span class="dv">4326</span>)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="co"># intersection avec la commune de référence</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>grillecom <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(grilleidf, COM)</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a><span class="co"># calculer la surface de chaque carreau au sein de la commune</span></span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>grillecom<span class="sc">$</span>surface <span class="ot">&lt;-</span> <span class="fu">st_area</span>(grillecom)</span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a><span class="co"># en hectare</span></span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>grillecom<span class="sc">$</span>surface <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(grillecom<span class="sc">$</span>surface)</span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>grillecom<span class="sc">$</span>surface <span class="ot">&lt;-</span> grillecom<span class="sc">$</span>surface <span class="sc">/</span> <span class="dv">10000</span></span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a><span class="co"># stations (IDF)</span></span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>stations <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;data/raw/stations/emplacement-des-gares-idf.shp&quot;</span>, <span class="at">crs =</span> <span class="dv">4326</span>)</span></code></pre></div>
+<pre><code>## Reading layer `emplacement-des-gares-idf&#39; from data source 
+##   `C:\Users\Ronan\Documents\github\riateTrain\2021_LAURIAN\data\raw\stations\emplacement-des-gares-idf.shp&#39; 
+##   using driver `ESRI Shapefile&#39;
+## Simple feature collection with 1152 features and 39 fields
+## Geometry type: POINT
+## Dimension:     XY
+## Bounding box:  xmin: 1.149004 ymin: 47.96112 xmax: 3.514336 ymax: 49.4262
+## Geodetic CRS:  WGS 84</code></pre>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sélection des stations au sein de la commune</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>selec <span class="ot">&lt;-</span> <span class="fu">st_intersects</span>(stations, COM)</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>selec <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(selec)</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>stations <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(stations, <span class="st">&quot;row.id&quot;</span>)</span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>selec<span class="sc">$</span>row.id <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(selec<span class="sc">$</span>row.id)</span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>stations<span class="sc">$</span>row.id <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(stations<span class="sc">$</span>row.id)</span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>stations <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(stations, selec, <span class="at">by =</span> <span class="st">&quot;row.id&quot;</span>)</span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a><span class="co"># On enlève les trams</span></span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a>stations <span class="ot">&lt;-</span> stations <span class="sc">%&gt;%</span> <span class="fu">filter</span>(mode <span class="sc">!=</span> <span class="st">&quot;Tramway&quot;</span>)</span></code></pre></div>
+</div>
+<div id="jointures-nécessaires" class="section level2" number="7.2">
+<h2 number="7.2"><span class="header-section-number">7.2</span> Jointures nécessaires</h2>
+<p>Afin d’affilier un logement à une entité géographique (IRIS, grille INSEE), il faut établir la jointure spatiale entre les couches de points et les polygones.</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># avant de faire la jointure spatiale on établit la géométrie des tableaux</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>individuel_clean <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(individuel_clean)</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>individuel_clean_sf <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(individuel_clean, <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">&quot;Longitude&quot;</span>, <span class="st">&quot;Latitude&quot;</span>), <span class="at">crs =</span> <span class="dv">4326</span>)</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a><span class="co"># jointure spatiale pour avoir le carreau d&#39;appartenance</span></span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>grillecom<span class="sc">$</span>id_carre <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(grillecom))</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a><span class="co"># création colonne id pour la future jointure</span></span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>individuel_clean_sf <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(individuel_clean_sf, <span class="st">&quot;id&quot;</span>) </span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>join <span class="ot">&lt;-</span> <span class="fu">st_intersects</span>(individuel_clean_sf, grillecom) <span class="co"># pour chaque logement à quel carreau il appartient</span></span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>join <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(join)</span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>join <span class="ot">&lt;-</span> join <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="st">&quot;id_carre&quot;</span> <span class="ot">=</span> col.id, <span class="st">&quot;id&quot;</span> <span class="ot">=</span> row.id) <span class="co"># pour avoir le meme identifiant de colonne </span></span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a><span class="co"># convertir les 2 colonnes id en numeric pour la jointure</span></span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a>individuel_clean_sf<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(individuel_clean_sf<span class="sc">$</span>id)</span>
+<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a>join<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(join<span class="sc">$</span>id)</span>
+<span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-18"><a href="#cb60-18" aria-hidden="true" tabindex="-1"></a><span class="co"># jointure</span></span>
+<span id="cb60-19"><a href="#cb60-19" aria-hidden="true" tabindex="-1"></a>individuel_clean_sf <span class="ot">&lt;-</span> <span class="fu">left_join</span>(individuel_clean_sf, join, <span class="at">by=</span><span class="st">&quot;id&quot;</span>) <span class="co"># il y a des NA</span></span>
+<span id="cb60-20"><a href="#cb60-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-21"><a href="#cb60-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-22"><a href="#cb60-22" aria-hidden="true" tabindex="-1"></a><span class="co"># même manip pour les IRIS</span></span>
+<span id="cb60-23"><a href="#cb60-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-24"><a href="#cb60-24" aria-hidden="true" tabindex="-1"></a>join <span class="ot">&lt;-</span> <span class="fu">st_intersects</span>(individuel_clean_sf, iris)</span>
+<span id="cb60-25"><a href="#cb60-25" aria-hidden="true" tabindex="-1"></a>join <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(join)</span>
+<span id="cb60-26"><a href="#cb60-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-27"><a href="#cb60-27" aria-hidden="true" tabindex="-1"></a>join <span class="ot">&lt;-</span> join <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="st">&quot;id_iris&quot;</span> <span class="ot">=</span> col.id, <span class="st">&quot;id&quot;</span> <span class="ot">=</span> row.id) <span class="co"># pour avoir le meme identifiant de colonne </span></span>
+<span id="cb60-28"><a href="#cb60-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-29"><a href="#cb60-29" aria-hidden="true" tabindex="-1"></a><span class="co"># convertir les 2 colonnes id en numeric pour la jointure</span></span>
+<span id="cb60-30"><a href="#cb60-30" aria-hidden="true" tabindex="-1"></a>join<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(join<span class="sc">$</span>id)</span>
+<span id="cb60-31"><a href="#cb60-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-32"><a href="#cb60-32" aria-hidden="true" tabindex="-1"></a><span class="co"># jointure</span></span>
+<span id="cb60-33"><a href="#cb60-33" aria-hidden="true" tabindex="-1"></a>individuel_clean_sf <span class="ot">&lt;-</span> <span class="fu">left_join</span>(individuel_clean_sf, join, <span class="at">by=</span><span class="st">&quot;id&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="export-des-données" class="section level1" number="8">
+<h1 number="8"><span class="header-section-number">8</span> Export des données</h1>
+<p>Avant d’exporter les tableaux de données, on les renomme selon le nom de la commune.</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>nom <span class="ot">&lt;-</span> <span class="fu">paste0</span>(nomcom, <span class="st">&quot;_individuel&quot;</span>)</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">assign</span>(nom, individuel_clean)</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(a, <span class="fu">paste0</span>(<span class="st">&quot;data/consolidated/&quot;</span>, nomcom, <span class="st">&quot;_individuel.csv&quot;</span>))</span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>nom <span class="ot">&lt;-</span> <span class="fu">paste0</span>(nomcom, <span class="st">&quot;_mensuel&quot;</span>)</span>
+<span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">assign</span>(nom, mensuel_clean)</span>
+<span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(b, <span class="fu">paste0</span>(<span class="st">&quot;data/consolidated/&quot;</span>,nomcom, <span class="st">&quot;_mensuel.csv&quot;</span>))</span>
+<span id="cb61-8"><a href="#cb61-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-9"><a href="#cb61-9" aria-hidden="true" tabindex="-1"></a>nom <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;hotels_&quot;</span>, nomcom)</span>
+<span id="cb61-10"><a href="#cb61-10" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">assign</span>(nom, hotels)</span>
+<span id="cb61-11"><a href="#cb61-11" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(c, <span class="fu">paste0</span>(<span class="st">&quot;data/insee/hotels_&quot;</span>, nomcom, <span class="st">&quot;.csv&quot;</span>))</span>
+<span id="cb61-12"><a href="#cb61-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-13"><a href="#cb61-13" aria-hidden="true" tabindex="-1"></a>nom <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;log_&quot;</span>, nomcom)</span>
+<span id="cb61-14"><a href="#cb61-14" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">assign</span>(nom, log_com)</span>
+<span id="cb61-15"><a href="#cb61-15" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(d, <span class="fu">paste0</span>(<span class="st">&quot;data/insee/log_&quot;</span>, nomcom, <span class="st">&quot;.csv&quot;</span>))</span>
+<span id="cb61-16"><a href="#cb61-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-17"><a href="#cb61-17" aria-hidden="true" tabindex="-1"></a><span class="co"># si on veut avoir les tableaux raw</span></span>
+<span id="cb61-18"><a href="#cb61-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-19"><a href="#cb61-19" aria-hidden="true" tabindex="-1"></a><span class="co"># nom &lt;- paste0(nomcom, &quot;_individuel_raw&quot;)</span></span>
+<span id="cb61-20"><a href="#cb61-20" aria-hidden="true" tabindex="-1"></a><span class="co"># e &lt;- assign(nom, individuel_raw)</span></span>
+<span id="cb61-21"><a href="#cb61-21" aria-hidden="true" tabindex="-1"></a><span class="co"># write_csv(d, paste0(nomcom, &quot;_individuel_raw.csv&quot;))</span></span>
+<span id="cb61-22"><a href="#cb61-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-23"><a href="#cb61-23" aria-hidden="true" tabindex="-1"></a><span class="co"># nom &lt;- paste0(nomcom, &quot;_mensuel_raw&quot;)</span></span>
+<span id="cb61-24"><a href="#cb61-24" aria-hidden="true" tabindex="-1"></a><span class="co"># f &lt;- assign(nom, mensuel_clean)</span></span>
+<span id="cb61-25"><a href="#cb61-25" aria-hidden="true" tabindex="-1"></a><span class="co"># write_csv(e, paste0(nomcom, &quot;_mensuel_raw.csv&quot;))</span></span>
+<span id="cb61-26"><a href="#cb61-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-27"><a href="#cb61-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Enfin on crée le geopackage</span></span>
+<span id="cb61-28"><a href="#cb61-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-29"><a href="#cb61-29" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(<span class="at">obj =</span> COM, <span class="at">dsn =</span> <span class="fu">paste0</span>(<span class="st">&quot;data/consolidated/&quot;</span>, nomcom, <span class="st">&quot;.gpkg&quot;</span>), <span class="at">layer =</span> <span class="st">&quot;COM&quot;</span>, <span class="at">delete_layer =</span> <span class="cn">TRUE</span>, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb61-30"><a href="#cb61-30" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(<span class="at">obj =</span> iris, <span class="at">dsn =</span> <span class="fu">paste0</span>(<span class="st">&quot;data/consolidated/&quot;</span>, nomcom, <span class="st">&quot;.gpkg&quot;</span>), <span class="at">layer =</span> <span class="st">&quot;iris&quot;</span>, <span class="at">delete_layer =</span> <span class="cn">TRUE</span>, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb61-31"><a href="#cb61-31" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(<span class="at">obj =</span> grillecom, <span class="at">dsn =</span> <span class="fu">paste0</span>(<span class="st">&quot;data/consolidated/&quot;</span>, nomcom, <span class="st">&quot;.gpkg&quot;</span>), <span class="at">layer =</span> <span class="st">&quot;grillecom&quot;</span>, <span class="at">delete_layer =</span> <span class="cn">TRUE</span>, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb61-32"><a href="#cb61-32" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(<span class="at">obj =</span> stations, <span class="at">dsn =</span> <span class="fu">paste0</span>(<span class="st">&quot;data/consolidated/&quot;</span>, nomcom, <span class="st">&quot;.gpkg&quot;</span>), <span class="at">layer =</span> <span class="st">&quot;stations&quot;</span>, <span class="at">delete_layer =</span> <span class="cn">TRUE</span>, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb61-33"><a href="#cb61-33" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(<span class="at">obj =</span> individuel_clean_sf, <span class="at">dsn =</span> <span class="fu">paste0</span>(<span class="st">&quot;data/consolidated/&quot;</span>, nomcom, <span class="st">&quot;.gpkg&quot;</span>), <span class="at">layer =</span> <span class="fu">paste0</span>(nomcom, <span class="st">&quot;_individuel_sf&quot;</span>), <span class="at">delete_layer =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>En résultat on a les fichiers <strong>Issy_individuel</strong>, <strong>Issy_mensuel</strong> et <strong>hotels_Issy</strong>, ainsi qu’un geopackage <strong>Issy.gpkg</strong> avec la commune, les iris, la grille INSEE intersectée avec la commune, les stations de métro présentes dans la commune, et le fichier <strong>Issy_individuel_sf</strong>.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

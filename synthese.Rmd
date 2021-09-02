@@ -1,0 +1,2127 @@
+---
+title: "Synthèse communale"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+```{r}
+library(knitr) # Générer des rapports automatisés
+library(rmdformats) # Format du document markdown
+```
+
+```{r}
+library(readr) # Import de fichiers csv
+library(dplyr) # Manipulation de dataframes
+library(tidyr) # pareil
+library(ggplot2) # Production de graphiques
+library(sf) # Opérations de géotraitement
+library(leaflet) # Cartographie interactive
+library(RColorBrewer) # Palettes de couleurs
+library(cartography) # Cartographie thématique
+library(kableExtra) # Faire des beau tableaux
+```
+
+
+# Issy-Les-Moulineaux
+
+```{r}
+# Seuls les paramètres de ce chunk sont à changer
+
+mensuel_clean <- read_csv("data/consolidated/issy_mensuel.csv")
+individuel_clean <- read_csv("data/consolidated/issy_individuel.csv")
+iris <- st_read("data/consolidated/issy.gpkg", layer = "iris", quiet = TRUE)
+grillecom <- st_read("data/consolidated/issy.gpkg", layer = "grillecom", quiet = TRUE)
+individuel_clean_sf <- st_read("data/consolidated/issy.gpkg", layer = "issy_individuel_sf", quiet = TRUE)
+
+commune <- "issy"
+periode <- 2019
+periode2 <- 2020
+hotels <- read_csv("data/insee/hotels_issy.csv")
+log <- read_csv("data/insee/log_issy.csv")
+```
+
+
+```{r}
+# On ne sélectionne que l'année choisie
+mois <- mensuel_clean %>% filter(year == periode)
+annee <- mois %>% select(-mois, -`Occupancy Rate`, -Active, -year, -month, -day, -activite,
+                              -actif, -duree, -tauxfreq)
+annee <- annee %>% group_by(id_logement) %>%
+  summarise(type = type, rev_tot = sum(revenus_mois), rev_nuitee = mean(revenus_nuitee, na.rm = TRUE),
+            nb_resa = sum(nb_resa), nb_nuitees = sum(nb_nuitees), nb_dispo = sum(nb_dispo),
+            nb_bloques = sum(nb_bloques), Latitude = Latitude, Longitude = Longitude,
+            id_hote = id_hote)
+annee <- annee %>% unique()
+
+# réestimation du taux de fréquentation et de la durée des séjours
+annee$tauxfreq <- annee$nb_nuitees / (annee$nb_nuitees + annee$nb_dispo)
+annee$tauxfreq <- annee$tauxfreq %>% round(digits = 2)
+
+annee$duree <- annee$nb_nuitees / annee$nb_resa
+annee$duree <- annee$duree %>% round(digits = 2)
+
+# ajout de la colonne prix et prixpers via le tableau individuel_clean
+annee <- merge(annee, individuel_clean, by = "id_logement", all.x = TRUE)# il ya des na
+annee <- annee %>% select(id_logement, type.x, rev_tot, rev_nuitee, nb_resa, nb_nuitees.x,
+                            nb_dispo.x, Latitude.x, Longitude.x, id_hote.x, tauxfreq.x, duree,
+                            Freq, titre, debut, prix, prixpers, Amenities, licence, multi, duree_min)
+
+annee <- annee %>% rename("type" = "type.x", "nb_nuitees" = "nb_nuitees.x",
+                            "nb_dispo" = "nb_dispo.x", "latitude" = "Latitude.x",
+                            "longitude" = "Longitude.x", "id_hote" = "id_hote.x",
+                            "tauxfreq" = "tauxfreq.x")
+annee <- annee %>% filter(!is.na(prix))
+
+# on transforme en objet sf en joignant l'id carre
+join <- individuel_clean_sf %>% select(id_logement, id_carre, id_iris)
+annee_sf <- left_join(annee, join, by = "id_logement")
+annee_sf <- annee_sf %>% select(-geom)
+annee_sf <- st_as_sf(annee_sf, coords = c("longitude", "latitude"), crs = 4326)
+
+# On effectue la même manip pour la période 2
+mois2 <- mensuel_clean %>% filter(year == periode2)
+annee2 <- mois2 %>% select(-mois, -`Occupancy Rate`, -Active, -year, -month, -day, -activite,
+                              -actif, -duree, -tauxfreq)
+annee2 <- annee2 %>% group_by(id_logement) %>%
+  summarise(type = type, rev_tot = sum(revenus_mois), rev_nuitee = mean(revenus_nuitee, na.rm = TRUE),
+            nb_resa = sum(nb_resa), nb_nuitees = sum(nb_nuitees), nb_dispo = sum(nb_dispo),
+            nb_bloques = sum(nb_bloques), Latitude = Latitude, Longitude = Longitude,
+            id_hote = id_hote)
+annee2 <- annee2 %>% unique()
+
+# réestimation du taux de fréquentation et de la durée des séjours
+annee2$tauxfreq <- annee2$nb_nuitees / (annee2$nb_nuitees + annee2$nb_dispo)
+annee2$tauxfreq <- annee2$tauxfreq %>% round(digits = 2)
+
+annee2$duree <- annee2$nb_nuitees / annee2$nb_resa
+annee2$duree <- annee2$duree %>% round(digits = 2)
+
+# ajout de la colonne prix et prixpers via le tableau individuel_clean
+annee2 <- merge(annee2, individuel_clean, by = "id_logement", all.x = TRUE)# il ya des na
+annee2 <- annee2 %>% select(id_logement, type.x, rev_tot, rev_nuitee, nb_resa, nb_nuitees.x,
+                            nb_dispo.x, Latitude.x, Longitude.x, id_hote.x, tauxfreq.x, duree,
+                            Freq, titre, debut, prix, prixpers, Amenities, licence, multi, duree_min)
+
+annee2 <- annee2 %>% rename("type" = "type.x", "nb_nuitees" = "nb_nuitees.x",
+                            "nb_dispo" = "nb_dispo.x", "latitude" = "Latitude.x",
+                            "longitude" = "Longitude.x", "id_hote" = "id_hote.x",
+                            "tauxfreq" = "tauxfreq.x")
+annee2 <- annee2 %>% filter(!is.na(prix))
+
+# on transforme en objet sf en joignant l'id carre
+join <- individuel_clean_sf %>% select(id_logement, id_carre, id_iris)
+annee2_sf <- left_join(annee2, join, by = "id_logement")
+annee2_sf <- annee2_sf %>% select(-geom)
+annee2_sf <- st_as_sf(annee2_sf, coords = c("longitude", "latitude"), crs = 4326)
+```
+
+
+```{r}
+annee_actifs <- annee %>% filter(nb_dispo > 0 | nb_nuitees > 0)
+annee_reserves <- annee %>% filter(nb_nuitees > 0)
+annee2_actifs <- annee2 %>% filter(nb_dispo > 0 | nb_nuitees > 0)
+annee2_reserves <- annee2 %>% filter(nb_nuitees > 0)
+
+entire <- annee_reserves %>% filter(type == "Entire home/apt")
+private <- annee_reserves %>% filter(type == "Private room")
+entire2 <- annee2_reserves %>% filter(type == "Entire home/apt")
+private2 <- annee2_reserves %>% filter(type == "Private room")
+```
+
+
+```{r, eval = FALSE}
+quali <- annee_reserves
+quali$freq <- cut(quali$Freq, c(0,1,12))
+quali$type <- as.factor(quali$type)
+quali$freq <- as.character(quali$freq)
+quali$freq[quali$freq == "(0,1]"] <- "1 logement"
+quali$freq[quali$freq == "(1,12]"] <- "2 logements ou +"
+quali$freq <- as.factor(quali$freq)
+
+ggplot(data = quali, aes(x = freq))+
+  geom_bar(aes(fill = type), position = "fill")
+
+quali2 <- quali %>% filter(type != "Entire home/apt" & Freq >= 2)
+nrow(quali2) / nrow(quali %>% filter(Freq >= 2))*100
+# x% des logements loués par des multiloueurs sont des chambres privées ou partagées
+```
+
+## Etat des lieux sur l'importance, la structure et la performance de l'offre Airbnb à `r commune` (`r periode`)
+
+En `r periode`, on compte `r nrow(annee)` logements inscrits sur la plateforme Airbnb à `r commune`, ce qui représente environ `r (nrow(annee) * 100 / log[1,21]) %>% round(digits = 1)`% de la totalité du marché du logement dans la commune[^1]. A titre de comparaison, on compte `r hotels[1,12]` chambres d'hôtel dans la commune[^2]. `r nrow(annee_actifs)` des logements Airbnb ont été proposés à la location au moins une fois sur l'année, et `r nrow(annee_reserves)` ont enregistré au moins une réservation. Un hôte qui rend son logement disponible a donc `r (nrow(annee_reserves) * 100 / nrow(annee_actifs)) %>% round(digits = 0)`% de chance d'engendrer une réservation. Les indicateurs calculés sur le tableau suivant prennent comme stock de référence ces `r nrow(annee_reserves)` logements réservés, dont `r nrow(entire)` sont des logements entiers, et `r nrow(private)` des chambres privées.
+
+```{r}
+indicateur <- data.frame(matrix(ncol = 4, nrow = 11))
+colnames(indicateur) <- c(paste("Indicateur (", periode ,")"), "Tous les logements", "Logements entiers", "Chambres privées")
+indicateur[ ,1] <- c("Taux d'activité (%)", "Prix par personne moyen (\\$)", "Taux de fréquentation moyen (%)", "Nombre moyen de nuitées disponibles", "Nombre moyen de nuitées réservées", "Part de logements loués fréquemment (>= 120 nuitées)", "Part de logements loués occasionnellement (<= 7 nuitées)", "Part des séjours de moins de 7 jours", "Part des séjours de 15 jours ou plus", "Part de logements détenus par des multiloueurs", "Revenu médian engendré par logement (\\$)")
+
+indicateur[1,2] <- nrow(annee_reserves) * 100 / nrow(annee_actifs)
+indicateur[1,3] <- nrow(entire) * 100 / nrow(annee_actifs %>% filter(type == "Entire home/apt"))
+indicateur[1,4] <- nrow(private) * 100 / nrow(annee_actifs %>% filter(type == "Private room"))
+
+indicateur[2,2] <- mean(annee_reserves$prixpers)
+indicateur[2,3] <- mean(entire$prixpers)
+indicateur[2,4] <- mean(private$prixpers)
+
+indicateur[3,2] <- sum(annee_reserves$nb_nuitees) * 100 / (sum(annee_reserves$nb_nuitees) + sum(annee_reserves$nb_dispo))
+indicateur[3,3] <- sum(entire$nb_nuitees) * 100 / (sum(entire$nb_nuitees) + sum(entire$nb_dispo))
+indicateur[3,4] <- sum(private$nb_nuitees) * 100 / (sum(private$nb_nuitees) + sum(private$nb_dispo))
+
+indicateur[4,2] <- mean(annee_reserves$nb_dispo + annee_reserves$nb_nuitees)
+indicateur[4,3] <- mean(entire$nb_dispo + entire$nb_nuitees)
+indicateur[4,4] <- mean(private$nb_dispo + private$nb_nuitees)
+
+indicateur[5,2] <- mean(annee_reserves$nb_nuitees)
+indicateur[5,3] <- mean(entire$nb_nuitees)
+indicateur[5,4] <- mean(private$nb_nuitees)
+
+indicateur[6,2] <- nrow(annee_reserves %>% filter(nb_nuitees >= 120)) * 100 / nrow(annee_reserves)
+indicateur[6,3] <- nrow(entire %>% filter(nb_nuitees >= 120)) * 100 / nrow(entire)
+indicateur[6,4] <- nrow(private %>% filter(nb_nuitees >= 120)) * 100 / nrow(private)
+
+indicateur[7,2] <- nrow(annee_reserves %>% filter(nb_nuitees <= 7)) * 100 / nrow(annee_reserves)
+indicateur[7,3] <- nrow(entire %>% filter(nb_nuitees <= 7)) * 100 / nrow(entire)
+indicateur[7,4] <- nrow(private %>% filter(nb_nuitees <= 7)) * 100 / nrow(private)
+
+indicateur[8,2] <- nrow(annee_reserves %>% filter(duree < 7)) * 100 / nrow(annee_reserves)
+indicateur[8,3] <- nrow(entire %>% filter(duree < 7)) * 100 / nrow(entire)
+indicateur[8,4] <- nrow(private %>% filter(duree < 7)) * 100 / nrow(private)
+
+indicateur[9,2] <- nrow(annee_reserves %>% filter(duree >= 15)) * 100 / nrow(annee_reserves)
+indicateur[9,3] <- nrow(entire %>% filter(duree >= 15)) * 100 / nrow(entire)
+indicateur[9,4] <- nrow(private %>% filter(duree >= 15)) * 100 / nrow(private)
+
+indicateur[10,2] <- nrow(annee_reserves %>% filter(multi == TRUE)) * 100 / nrow(annee_reserves)
+indicateur[10,3] <- nrow(entire %>% filter(multi == TRUE)) * 100 / nrow(entire)
+indicateur[10,4] <- nrow(private %>% filter(multi == TRUE)) * 100 / nrow(private)
+
+indicateur[11,2] <- median(annee_reserves$rev_tot)
+indicateur[11,3] <- median(entire$rev_tot)
+indicateur[11,4] <- median(private$rev_tot)
+
+indicateur[1,1] <- paste0(indicateur[1,1], footnote_marker_alphabet(1))
+
+kable(indicateur, align = "c", escape = F, digits = 0) %>%
+  kable_paper(full_width = F) %>%
+  footnote(alphabet = "Le taux d'activité désigne le nombre de logements réservés par rapport au nombre de logements actifs") %>%
+  column_spec(1, bold = TRUE)
+```
+
+
+```{r}
+# Sur ces `r nrow(annee_reserves)` logements, `r nrow(annee_reserves %>% filter(type == "Entire home/apt"))` sont des logements entiers (`r (nrow(annee_reserves %>% filter(type == "Entire home/apt")) * 100 / nrow(annee_reserves)) %>% round(digits = 0)`%), et `r nrow(annee_reserves %>% filter(type == "Private room"))` des chambres privées. Le nombre de chambres partagées est négligeable.
+
+# Le prix moyen par personne par nuitée d'un logement est de `r (mean(annee_reserves$prixpers)) %>% round(digits = 1)`\$. Comptez `r (mean(entire$prixpers)) %>% round(digits = 1)`\$ pour un logement entier et `r (mean(private$prixpers)) %>% round(digits = 1)`\$ pour une chambre privée.
+
+# Le taux de fréquentation (nombre de nuitées réservées par rapport au nombre de nuitées disponibles) est de `r (sum(annee_reserves$nb_nuitees) * 100 / (sum(annee_reserves$nb_nuitees) + sum(annee_reserves$nb_dispo))) %>% round(digits = 1)`%. Il est de `r (sum(entire$nb_nuitees) * 100 / (sum(entire$nb_nuitees) + sum(entire$nb_dispo))) %>% round(digits = 1)`% parmi les logements entiers et `r (sum(private$nb_nuitees) * 100 / (sum(private$nb_nuitees) + sum(private$nb_dispo))) %>% round(digits = 1)`% pour les chambres privées
+
+# En moyenne, un logement a proposé `r (mean(annee_reserves$nb_dispo) + mean(annee_reserves$nb_nuitees)) %>% round(digits = 1)` nuitées en `r periode`, et `r (mean(annee_reserves$nb_nuitees)) %>% round(digits = 1)` ont été réservées, soit `r (mean(annee_reserves$nb_nuitees) * 100 / (mean(annee_reserves$nb_dispo) + mean(annee_reserves$nb_nuitees))) %>% round(digits = 1)`%. Lorsque l'on découpe le nombre de nuitées réservées en classes, on peut distinguer les loueurs occasionnels (< 7 nuitées) des plus fréquents (> 120 nuitées) : `r tab$Pourcentage[5]`% des logements font partie de cette dernière catégorie.
+```
+
+### Un marché concentré ?
+
+```{r fig.asp = 1, fig.width = 4, align = "left"}
+breaks <- seq(0, max(annee_reserves$nb_nuitees), by = 1)
+
+test <- annee_reserves
+test$nb_log <- 1
+test$intervalle <- findInterval(test$nb_nuitees, vec = breaks)
+test$intervalle <- breaks[test$intervalle]
+dist <- aggregate(test$nb_nuitees, by = list(test$intervalle), sum)
+
+dist$freq <- cumsum(dist$x)
+dist$nb_log <- dist$x / dist$Group.1
+
+dist$cumul <- dist$freq/dist[nrow(dist), 3]* 100
+dist$cumul <- dist$cumul %>% round(digits = 2)
+
+dist$cumul_log <- cumsum(dist$nb_log)
+dist$cumul_log <- dist$cumul_log / max(dist$cumul_log)
+dist$cumul_log <- dist$cumul_log * 100
+dist$cumul_log <- dist$cumul_log %>% round(digits = 2)
+
+colnames(dist) <- c("nb_nuitees", "nb_nuitees_tot", "cumul", "nb_log", "cumulpct", "cumul_log")
+
+dist$cumulpct <- 100 -dist$cumulpct
+dist$cumul_log <- 100 -dist$cumul_log
+
+ref_x <- dist %>% filter(abs(cumul_log-20) == min(abs(cumul_log-20)))
+ref_x <- ref_x[1,6]
+val_y <- dist %>% filter(cumul_log == ref_x)
+val_y <- val_y[1,5]
+
+plot1 <- ggplot(data = dist, aes(x = cumul_log, y = cumulpct))+
+  geom_line() +
+  labs(title = "Nuitées engendrées par les hôtes",
+       x = "Effectif cumulé des logements Airbnb (%)",
+       y = "Nombre total de nuitées réservées (%)",
+       caption = paste("source : airdna.co,", periode)) +
+  scale_x_continuous(breaks = seq(0,100,10)) +
+  scale_y_continuous(breaks = seq(0,100,10)) + 
+  geom_segment(aes(x = ref_x, 
+    y = 0, xend = ref_x, yend = val_y), linetype = "dashed", colour = "black") + 
+    geom_segment(aes(x = 0, y = val_y, xend = ref_x, yend = val_y), linetype = "dashed", colour = "black") + geom_point(aes(x = ref_x, y = val_y), shape = 21, fill = "white", colour = "black", size = 4, stroke = 2) + 
+ggplot2::annotate("text", x = ref_x + 5, y = val_y, label = paste0(round((ref_x)), " % des logements concentrent \n ", (val_y), "% des nuitées Airbnb"), 
+    vjust = 1, hjust = 0, colour = "black")
+```
+
+```{r fig.asp = 1, fig.width = 4, align = "right"}
+breaks4 <- seq(0, max(annee_reserves$rev_tot), by = 1)
+
+test4 <- annee_actifs
+test4$nb_log <- 1
+test4$intervalle <- findInterval(test4$rev_tot, vec = breaks4)
+test4$intervalle <- breaks4[test4$intervalle]
+dist4 <- aggregate(test4$rev_tot, by = list(test4$intervalle), sum)
+
+dist4$freq <- cumsum(dist4$x)
+dist4$nb_log <- dist4$x / dist4$Group.1
+dist4$nb_log[1] <- nrow(annee_reserves %>% filter(rev_tot == 0))
+
+dist4$cumul <- dist4$freq/dist4[nrow(dist4), 3]* 100
+dist4$cumul <- dist4$cumul %>% round(digits = 2)
+
+dist4$cumul_log <- cumsum(dist4$nb_log)
+dist4$cumul_log <- dist4$cumul_log / max(dist4$cumul_log)
+dist4$cumul_log <- dist4$cumul_log * 100
+dist4$cumul_log <- dist4$cumul_log %>% round(digits = 2)
+
+colnames(dist4) <- c("rev_tot", "rev_tot_tot", "cumul", "nb_log", "cumulpct", "cumul_log")
+
+dist4$cumulpct <- 100 -dist4$cumulpct
+dist4$cumul_log <- 100 -dist4$cumul_log
+
+ref_x2 <- dist4 %>% filter(abs(cumul_log-20) == min(abs(cumul_log-20)))
+ref_x2 <- ref_x2[1,6]
+val_y2 <- dist4 %>% filter(cumul_log == ref_x2)
+val_y2 <- val_y2[1,5]
+
+plot2 <- ggplot(data = dist4, aes(x = cumul_log, y = cumulpct))+
+  geom_line() +
+  labs(title = "Revenus totaux engendrés par les hôtes",
+       x = "Effectif cumulé des logements Airbnb (%)",
+       y = "Revenus totaux (%)",
+       caption = paste("source : airdna.co,", periode)) +
+  xlim(0,100) +
+  scale_x_continuous(breaks = seq(0,100,10)) +
+  scale_y_continuous(breaks = seq(0,100,10)) + 
+  geom_segment(aes(x = ref_x2, 
+    y = 0, xend = ref_x2, yend = val_y2), linetype = "dashed", colour = "black") + 
+    geom_segment(aes(x = 0, y = val_y2, xend = ref_x2, yend = val_y2), linetype = "dashed", colour = "black") + geom_point(aes(x = ref_x2, y = val_y2), shape = 21, fill = "white", colour = "black", size = 4, stroke = 2) + 
+ggplot2::annotate("text", x = ref_x2 + 5, y = val_y2, label = paste0(round((ref_x2)), " % des logements concentrent \n ", (val_y2), "% des revenus"), 
+    vjust = 1, hjust = 0, colour = "black")
+```
+
+Les nuitées sont assez concentrées dans un petit nombre de logements : en effet, `r round(ref_x)`% des logements concentrent `r round(val_y)`% des nuitées réservées de la commune. Lorsque l'on s'intéresse aux revenus engrangés, on observe que `r round(ref_x2)`% des logements concentrent près des `r round(val_y2)`% de la totalité des revenus générés par Airbnb en `r periode` à `r commune`.
+
+```{r}
+library(gridExtra) # pour mettre 2 graphiques côte à côte
+grid.arrange(plot1, plot2, ncol = 2)
+```
+
+```{r fig.asp = 1, fig.width = 3, align = "right"}
+# Focus sur les hôtes qui engrangent le plus de revenus dans un petit encadré
+hotes_riches <- annee_reserves %>% group_by(id_hote) %>%
+  summarise(revtot = (sum(rev_tot)) %>% round(digits = 0), id_hote = id_hote, Freq = Freq)
+
+hotes_riches <- hotes_riches[order(-hotes_riches$revtot),]
+hotes_riches <- hotes_riches %>% unique()
+hotes_riches <- tibble::rownames_to_column(hotes_riches, "rang")
+hotes_riches <- hotes_riches[-2]
+colnames(hotes_riches) <- c("Rang", paste("Revenus en ", periode, "(\\$)"), "Nombre de logements")
+sum <- (max(hotes_riches[, 2]) * 100 / sum(annee_reserves$rev_tot)) %>% round(digits = 2)
+```
+
+
+<br/><br/> <div style= "float:right;position: relative; top: -30px;">
+```{r fig.asp = 1, fig.width = 3, position = "float right"}
+knitr::kable(head(hotes_riches, 5), caption = paste("<center><strong>Top hôtes</strong></center>", periode))
+```
+
+```{r}
+options(scipen = 3)
+hotes_riches <- hotes_riches %>% rename("nblog" = "Nombre de logements")
+```
+
+
+</div><br/>
+<br/> 
+En regardant les hôtes qui engrangent le plus de revenus, on trouve un multiloueur qui a lui seul près de `r (hotes_riches[1,2]) %>% round(digits = -3)`\$, soit `r sum`% de la totalité des revenus engendrés par le marché Airbnb à `r commune` en `r periode`. Sur les 5 hôtes engrangeant le plus de revenus, `r nrow(head(hotes_riches, 5) %>% filter(nblog == 1))` sont monoloueurs.
+<br/><br/><br/><br/>
+
+
+## Analyse temporelle `r min(mensuel_clean$year)`-`r periode2`
+
+
+```{r}
+annee <- mutate(annee,
+                activite = case_when(
+                  annee$nb_dispo == 0 & annee$nb_nuitees == 0 ~ "Jamais proposé",
+                  annee$nb_dispo > 0 & annee$nb_nuitees == 0 ~ "Proposé, jamais réservé",
+                  annee$nb_nuitees > 0 ~ "Réservé au moins une fois"
+                  ))
+
+annee2 <- mutate(annee2,
+                activite = case_when(
+                  annee2$nb_dispo == 0 & annee2$nb_nuitees == 0 ~ "Jamais proposé",
+                  annee2$nb_dispo > 0 & annee2$nb_nuitees == 0 ~ "Proposé, jamais réservé",
+                  annee2$nb_nuitees > 0 ~ "Réservé au moins une fois"
+                  ))
+
+
+test <- merge(annee, annee2, by = "id_logement")
+test$negatif <- test$nb_nuitees.x - test$nb_nuitees.y
+test$tauxfreq_n0 <- test$nb_nuitees.x * 100 / (test$nb_dispo.x + test$nb_nuitees.x)
+test$tauxfreq_n1 <- test$nb_nuitees.y * 100 / (test$nb_dispo.y + test$nb_nuitees.y)
+test$baisse <- ((test$tauxfreq_n1 - test$tauxfreq_n0) / test$tauxfreq_n0) * 100
+test <- test %>% filter(!is.na(baisse))
+test <- test %>% filter(baisse < 999999)
+
+tauxfreq_entire_n1 <- sum(entire$nb_nuitees) * 100 / (sum(entire$nb_dispo) + sum(entire$nb_nuitees))
+tauxfreq_entire_n2 <- sum(entire2$nb_nuitees) * 100 / (sum(entire2$nb_dispo) + sum(entire2$nb_nuitees))
+evol_entire <- ((tauxfreq_entire_n2 - tauxfreq_entire_n1) / tauxfreq_entire_n1 * 100) %>% round(digits = 2)
+
+tauxfreq_private_n1 <- sum(private$nb_nuitees) * 100 / (sum(private$nb_dispo) + sum(private$nb_nuitees))
+tauxfreq_private_n2 <- sum(private2$nb_nuitees) * 100 / (sum(private2$nb_dispo) + sum(private2$nb_nuitees))
+evol_private <- ((tauxfreq_private_n2 - tauxfreq_private_n1) / tauxfreq_private_n1 * 100) %>% round(digits = 2)
+```
+<br/>
+L'arrêt de l'activité du marché Airbnb à `r commune` s'observe tout d'abord au niveau du nombre de locations réservées : entre `r periode` et `r periode2`, elles ont subi une chute de `r -(((nrow(annee2_reserves) - nrow(annee_reserves)) / nrow(annee_reserves)) * 100) %>% round(digits = 0)`%, passant de `r nrow(annee_reserves)` à `r nrow(annee2_reserves)` unités.
+Les courbes ci-dessus montrent un déclin du nombre de nuitées réservées à partir de mars 2020, lors de la période de restriction des déplacements. En effet, on observe une chute moyenne de `r -(mean(test$baisse)) %>% round(digits = 0)`% du taux de fréquentation par logement de `r periode` à `r periode2` Seul `r (nrow(test %>% filter(negatif < 0)) * 100 / nrow(test)) %>% round(digits = 1)`% des logements ont connu une hausse du nombre de leur visites entre `r periode` et `r periode2`
+Enfin, l'arrêt du tourisme se ressent au niveau des revenus : ils sont passés de près de `r (sum(annee_reserves$rev_tot)) %>% round(digits = -5)`\$  en `r periode` à `r (sum(annee2_reserves$rev_tot)) %>% round(digits = -5)`\$ en `r periode2`. 
+
+
+### activité
+
+
+```{r}
+# Les logements entiers engendraient `r (sum(entire$rev_tot) * 100 /sum(annee_reserves$rev_tot)) %>% round(digits = 0)`% des revenus totaux de la commune en `r periode`, contre `r (sum(entire2$rev_tot) * 100 /sum(annee2_reserves$rev_tot)) %>% round(digits = 0)`% en `r periode2`. On observe un léger fléchissement de la tendance, malgré une baisse similaire de l'effectif de ces logements (respectivement `r ((nrow(entire2) - nrow(entire))* 100 / nrow(entire)) %>% round(digits = 2)` et `r ((nrow(private2) - nrow(private))* 100 / nrow(private)) %>% round(digits = 2)`%) . De plus, la baisse de fréquentation entre `r periode` et `r periode2` est moins marquée chez les chambres privées (`r evol_private`%) que parmi les logements entiers (`r evol_entire`%). Les chambres privées sont-elles les grandes gagnantes d'un marché déstructuré ?
+
+reserves_n0 <- annee_reserves %>% select(id_logement, nb_nuitees, nb_dispo)
+reserves_n0 <- reserves_n0 %>% rename("nb_nuitees_n0" = "nb_nuitees", "nb_dispo_n0" = "nb_dispo")
+reserves_n1 <- annee2_reserves %>% select(id_logement, nb_nuitees, nb_dispo)
+reserves_n1 <- reserves_n1 %>% rename("nb_nuitees_n1" = "nb_nuitees", "nb_dispo_n1" = "nb_dispo")
+
+fracas <- left_join(reserves_n0, reserves_n1, by = "id_logement", all.x = TRUE)
+join <- individuel_clean_sf %>% select(id_logement, id_carre)
+fracas <- left_join(join, fracas, by = "id_logement")
+fracas <- na.omit(fracas) # 293 logements sont réservés à la fois en 2019 et en 2020
+
+tab <- as.data.frame(table(fracas$id_carre))
+tab <- tab %>% rename("id_carre" = "Var1", "nb_log" = "Freq")
+
+fracas <- fracas %>% group_by(id_carre) %>%
+  summarise(nb_nuitees_n0 = sum(nb_nuitees_n0), nb_dispo_n0 = sum(nb_dispo_n0), nb_nuitees_n1 = sum(nb_nuitees_n1), nb_dispo_n1 = sum(nb_dispo_n1)) %>%
+  mutate(tauxfreq_n0 = (nb_nuitees_n0 * 100 / (nb_nuitees_n0 + nb_dispo_n0)), tauxfreq_n1 = (nb_nuitees_n1 * 100 / (nb_nuitees_n1 + nb_dispo_n1))) %>%
+  select(id_carre, tauxfreq_n0, tauxfreq_n1) %>%
+  mutate(evol = (((tauxfreq_n1 - tauxfreq_n0) / tauxfreq_n0) * 100)) %>%
+  select(id_carre, evol) %>%
+  filter(evol < 999999) # pour enlever les Inf
+
+fracas <- merge(fracas, tab, by = "id_carre")
+```
+
+
+```{r}
+# On crée la colonne jours_tot correspondant au nb de jours totaux durant lesquels le logement est en capacité d'être réservé
+mois_actifs <- mensuel_clean %>% filter(nb_dispo > 0 | nb_nuitees > 0)
+mois_actifs$jours_tot <- mois_actifs$nb_dispo + mois_actifs$nb_nuitees
+
+# puis on group_by les mois réservés en additionnant les jours réservés et le nombre de jours totaux
+months <- mois_actifs %>%
+  group_by(mois) %>%
+  summarise(nb_dispo = sum(jours_tot), nb_resa = sum(nb_nuitees))
+
+months <- months %>% mutate("Nombre de nuitées disponibles" = nb_dispo - nb_resa)
+months <- months %>% rename("Nombre de nuitées réservées" = nb_resa)
+empil <- months %>% 
+  gather("Nombre de nuitées disponibles", "Nombre de nuitées réservées", key = etat, value = count) %>% 
+  mutate(month = format(mois, format = "%Y-%m")) %>%
+  select(-mois, nb_dispo)
+
+p <- ggplot(data = empil, aes(x = month, y = count)) +
+  geom_col(stat = 'identity', aes(fill = etat, width = 0.7)) +
+  labs(title = "Réservations vs disponibilité",
+       x = "Date",
+       y = "Nombre de nutiées par mois",
+       fill = "",
+       caption = paste0("source : airdna.co, ", commune, ", novembre 2020")) +
+  scale_colour_manual(name = "Légende", labels = c("Nombre de nuitées disponibles", "Nombre de nuitées réservées"), values = c("nb_dispo", "count")) +
+  theme(legend.position = c(0.8,0.95),
+        legend.background = element_rect(fill = NA)) +
+  scale_x_discrete(breaks = c("2015-08", "2016-08", "2017-08", "2018-08", "2019-08", "2020-08"))
+p
+```
+
+ <br/> <br/> <div style= "float:left;position: relative; top: -10px;">
+```{r fig.height = 4, fig.width = 5.5, align = "left"}
+mois_reserves <- mensuel_clean %>% filter(nb_nuitees > 0)
+  
+bilan2015 <- mois_reserves %>%
+  filter(year == 2015) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2015 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2015)
+  
+bilan2016 <- mois_reserves %>%
+  filter(year == 2016) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2016 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2016)
+
+bilan2017 <- mois_reserves %>%
+  filter(year == 2017) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2017 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2017)
+
+bilan2018 <- mois_reserves %>%
+  filter(year == 2018) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2018 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2018)
+
+bilan2019 <- mois_reserves %>%
+  filter(year == 2019) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2019 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2019)
+
+bilan2020 <- mois_reserves %>%
+  filter(year == 2020) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2020 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2020)
+
+# merge en 1 seul tableau pour préparer le graphique
+plotfreq <- merge(bilan2015, bilan2016, by = "month", all = TRUE)
+plotfreq <- merge(plotfreq, bilan2017, by = "month", all = TRUE)
+plotfreq <- merge(plotfreq, bilan2018, by = "month", all = TRUE)
+plotfreq <- merge(plotfreq, bilan2019, by = "month", all = TRUE)
+plotfreq <- merge(plotfreq, bilan2020, by = "month", all = TRUE)
+
+
+saison <- ggplot(data = plotfreq,
+                 aes(x = month, group = 1)) +
+  geom_line(stat = "identity", aes(y = tauxfreq2015, colour = "tauxfreq2015")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2016, colour = "tauxfreq2016")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2017, colour = "tauxfreq2017")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2018, colour = "tauxfreq2018")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2019, colour = "tauxfreq2019")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2020, colour = "tauxfreq2020")) +
+  # scale_fill_brewer(palette = "PuBu") +
+  scale_colour_manual(name = "Année", labels = c("2015", "2016", "2017", "2018", "2019", "2020"), values = c("tauxfreq2015" = "grey69", "tauxfreq2016" = "dodgerblue1", "tauxfreq2017" = "dodgerblue2", "tauxfreq2018" = "dodgerblue3", "tauxfreq2019" = "dodgerblue4", "tauxfreq2020" = "red2")) +
+  xlab("Mois") +
+  scale_y_continuous("Taux de fréquentation (%)") +
+  labs(title = "Saisonnalité des logements Airbnb",
+       subtitle = "Parmi les logements réservés",
+       caption = "source : airdna.co, novembre 2020")+
+  theme_bw()
+# méthode : pour chaque mois calculer le taux de fréquentation en divisant la somme des nuitées
+# réservées par la somme des nuitées disponibles pour les logements actifs
+saison
+```
+
+</div><br/><br/>
+Les mois de juin et de septembre correspondent aux taux de fréquentation les plus élevés, tandis qu'août et novembre correspondent à des saisons creuses en raison du plus fort nombre de nuitées disponibles à ces périodes-là. Le comportement de l'année 2020 est complètement différent des autres années.
+<br/><br/><br/><br/><br/>
+
+## Analyse infra-communale
+
+
+```{r}
+# fonction pour compter le nombre de points par carré
+CountPt <- function(x, pt){
+  # Intersection avec l'objet sf de référence
+  inter <- st_intersects(x, pt)
+  # Nombre de points par objet géographique
+  v <- sapply(X = inter, FUN = length)
+  return(v)
+}
+
+annee_reserves_sf <- annee_sf %>% filter(nb_nuitees > 0)
+grillecom$count <- CountPt(grillecom, annee_reserves_sf)
+```
+
+```{r, results = 'hide'}
+# densité de points (nb logement / ha)
+grillecom$densite <- grillecom$count / grillecom$surface
+grillecom$densite <- grillecom$densite %>% round(digits = 1)
+```
+
+
+```{r}
+# pour compter la moyenne du prix par carré
+prixmedcarre <- annee_reserves_sf %>%
+  group_by(id_carre) %>%
+  summarise(prixmed = median(prixpers), nb_logement = n())
+
+# préparer la jointure
+# grillecom <- tibble::rownames_to_column(grillecom, "id_carre") # enlever/ajouter un # si ça ne marche pas
+grillecom$id_carre <- as.numeric(grillecom$id_carre)
+
+# jointure
+test <- st_join(grillecom, prixmedcarre)
+test$prixmed <- test$prixmed %>% round(digits = 2)
+```
+
+
+
+```{r}
+test <- test %>% filter(surface > 0.3) # car valeurs trop élevées si 1 logement sur une petite partie d'un carreau
+
+bins <- getBreaks(v = test$prixmed, nclass = 6, method = "fisher-jenks")
+pal <- colorBin("YlOrRd", domain = test$prixmed, bins = bins)
+labels <- sprintf(
+  "<strong>%s logements réservés</strong><br/> Prix médian : %g $ / personne",
+  test$nb_logement, test$prixmed
+) %>% lapply(htmltools::HTML)
+
+bins2 <- getBreaks(v = test$densite, nclass = 6, method = "fisher-jenks")
+pal2 <- colorBin("Blues", domain = test$densite, bin = bins2)
+labels2 <- sprintf(
+  "Densité : %s logement / hectare",
+  test$densite
+) %>% lapply(htmltools::HTML)
+
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = test,
+              group = "Densité (logements/ha)", 
+              fillColor = ~pal2(densite),
+              weight = 2,
+              opacity = 1,
+              color = "white",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 5,
+                color = "666",
+                dashArray = "",
+                fillOpacity = 0.7,
+                bringToFront = TRUE),
+              label = labels2,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal", padding = "3px 8px"),
+                textsize = "15px",
+                direction = "auto"))  %>% 
+  addLegend(pal = pal2, group = "Densité (logements/ha)", values = test$densite, opacity = 0.7, title = "Nombre de logements \npar hectare", position = "bottomright") %>%
+  addPolygons(data = test,
+              group = "Prix médian ($)", 
+              fillColor = ~pal(prixmed),
+              weight = 2,
+              opacity = 1,
+              color = "white",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 5,
+                color = "666",
+                dashArray = "",
+                fillOpacity = 0.7,
+                bringToFront = TRUE),
+              label = labels,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal", padding = "3px 8px"),
+                textsize = "15px",
+                direction = "auto")) %>%
+  addLegend(pal = pal, group = "Prix médian ($)", values = test$prixmed, opacity = 0.7, title = "Prix médian \nau carroyage", position = "bottomright") %>%
+  addLayersControl(
+    #baseGroups = c("Densité (logements/ha)", "Prix médian ($)"),
+    overlayGroups = c("Densité (logements/ha)", "Prix médian ($)"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+```
+
+
+<br/>
+
+```{r}
+# taux de fréquentation moyen par iris
+avgfreqiris <- annee_reserves_sf %>%
+  group_by(id_iris) %>%
+  summarise(nb_nuitees_tot = sum(nb_nuitees), nb_logement = n(), nb_dispo_tot = sum(nb_dispo) + sum(nb_nuitees))
+
+avgfreqiris$tauxfreq <- avgfreqiris$nb_nuitees_tot * 100 / (avgfreqiris$nb_nuitees_tot + avgfreqiris$nb_dispo_tot)
+
+# jointure
+iris <- tibble::rownames_to_column(iris, "id_iris") # pour joindre via cette colonne
+iris$id_iris <- as.numeric(iris$id_iris)
+
+test <- st_join(iris, avgfreqiris)
+
+iris <- st_transform(iris, crs = 2154)
+test <- st_transform(test, crs = 2154)
+
+# carte choropolèthe
+plot(
+  st_geometry(iris),
+  col = "white",
+  border = "black",
+  bg = "white"
+)
+propSymbolsChoroLayer(
+  x = test,
+  var = "nb_nuitees_tot",
+  border = "grey50",
+  lwd = 1,
+  legend.var.pos = "topleft",
+  legend.var.title.txt = "Nombre total de nuitées réservées",
+  var2 = "tauxfreq",
+  method = "fisher-jenks",
+  nclass = 5,
+  col = carto.pal(pal1 = "orange.pal", n1 = 5),
+  legend.var2.values.rnd = 2,
+  legend.var2.pos = "bottomright",
+  legend.var2.title.txt = "Taux de \nfréquentation (%)"
+)
+layoutLayer(
+  title = paste0("Taux de fréquentation moyen des logements Airbnb à ", commune, ", ", periode), 
+  sources = "source : Airdna, décembre 2020", 
+  author = "Laurian, 2021"
+)
+```
+
+
+[^1]: Source : Nombre de Logements (totaux) des communes d'Île-de-France (Donnée INSEE), 2017. https://data-iau-idf.opendata.arcgis.com/datasets/nombre-de-logements-totaux-des-communes-dîle-de-france-donnée-insee/explore
+[^2]: Source : capacité des communes en hébergements touristiques, INSEE base 2019 https://www.insee.fr/fr/statistiques/2021703
+
+
+<br><br>
+
+# Pantin
+
+```{r}
+# Seuls les paramètres de ce chunk sont à changer
+
+mensuel_clean <- read_csv("data/consolidated/pantin_mensuel.csv")
+individuel_clean <- read_csv("data/consolidated/pantin_individuel.csv")
+iris <- st_read("data/consolidated/pantin.gpkg", layer = "iris", quiet = TRUE)
+grillecom <- st_read("data/consolidated/pantin.gpkg", layer = "grillecom", quiet = TRUE)
+individuel_clean_sf <- st_read("data/consolidated/pantin.gpkg", layer = "pantin_individuel_sf", quiet = TRUE)
+
+commune <- "Pantin"
+periode <- 2019
+periode2 <- 2020
+hotels <- read_csv("data/insee/hotels_pantin.csv")
+log <- read_csv("data/insee/log_pantin.csv")
+```
+
+
+```{r}
+# On ne sélectionne que l'année choisie
+mois <- mensuel_clean %>% filter(year == periode)
+annee <- mois %>% select(-mois, -`Occupancy Rate`, -Active, -year, -month, -day, -activite,
+                              -actif, -duree, -tauxfreq)
+annee <- annee %>% group_by(id_logement) %>%
+  summarise(type = type, rev_tot = sum(revenus_mois), rev_nuitee = mean(revenus_nuitee, na.rm = TRUE),
+            nb_resa = sum(nb_resa), nb_nuitees = sum(nb_nuitees), nb_dispo = sum(nb_dispo),
+            nb_bloques = sum(nb_bloques), Latitude = Latitude, Longitude = Longitude,
+            id_hote = id_hote)
+annee <- annee %>% unique()
+
+# réestimation du taux de fréquentation et de la durée des séjours
+annee$tauxfreq <- annee$nb_nuitees / (annee$nb_nuitees + annee$nb_dispo)
+annee$tauxfreq <- annee$tauxfreq %>% round(digits = 2)
+
+annee$duree <- annee$nb_nuitees / annee$nb_resa
+annee$duree <- annee$duree %>% round(digits = 2)
+
+# ajout de la colonne prix et prixpers via le tableau individuel_clean
+annee <- merge(annee, individuel_clean, by = "id_logement", all.x = TRUE)# il ya des na
+annee <- annee %>% select(id_logement, type.x, rev_tot, rev_nuitee, nb_resa, nb_nuitees.x,
+                            nb_dispo.x, Latitude.x, Longitude.x, id_hote.x, tauxfreq.x, duree,
+                            Freq, titre, debut, prix, prixpers, Amenities, licence, multi, duree_min)
+
+annee <- annee %>% rename("type" = "type.x", "nb_nuitees" = "nb_nuitees.x",
+                            "nb_dispo" = "nb_dispo.x", "latitude" = "Latitude.x",
+                            "longitude" = "Longitude.x", "id_hote" = "id_hote.x",
+                            "tauxfreq" = "tauxfreq.x")
+annee <- annee %>% filter(!is.na(prix))
+
+# on transforme en objet sf en joignant l'id carre
+join <- individuel_clean_sf %>% select(id_logement, id_carre, id_iris)
+annee_sf <- left_join(annee, join, by = "id_logement")
+annee_sf <- annee_sf %>% select(-geom)
+annee_sf <- st_as_sf(annee_sf, coords = c("longitude", "latitude"), crs = 4326)
+
+# On effectue la même manip pour la période 2
+mois2 <- mensuel_clean %>% filter(year == periode2)
+annee2 <- mois2 %>% select(-mois, -`Occupancy Rate`, -Active, -year, -month, -day, -activite,
+                              -actif, -duree, -tauxfreq)
+annee2 <- annee2 %>% group_by(id_logement) %>%
+  summarise(type = type, rev_tot = sum(revenus_mois), rev_nuitee = mean(revenus_nuitee, na.rm = TRUE),
+            nb_resa = sum(nb_resa), nb_nuitees = sum(nb_nuitees), nb_dispo = sum(nb_dispo),
+            nb_bloques = sum(nb_bloques), Latitude = Latitude, Longitude = Longitude,
+            id_hote = id_hote)
+annee2 <- annee2 %>% unique()
+
+# réestimation du taux de fréquentation et de la durée des séjours
+annee2$tauxfreq <- annee2$nb_nuitees / (annee2$nb_nuitees + annee2$nb_dispo)
+annee2$tauxfreq <- annee2$tauxfreq %>% round(digits = 2)
+
+annee2$duree <- annee2$nb_nuitees / annee2$nb_resa
+annee2$duree <- annee2$duree %>% round(digits = 2)
+
+# ajout de la colonne prix et prixpers via le tableau individuel_clean
+annee2 <- merge(annee2, individuel_clean, by = "id_logement", all.x = TRUE)# il ya des na
+annee2 <- annee2 %>% select(id_logement, type.x, rev_tot, rev_nuitee, nb_resa, nb_nuitees.x,
+                            nb_dispo.x, Latitude.x, Longitude.x, id_hote.x, tauxfreq.x, duree,
+                            Freq, titre, debut, prix, prixpers, Amenities, licence, multi, duree_min)
+
+annee2 <- annee2 %>% rename("type" = "type.x", "nb_nuitees" = "nb_nuitees.x",
+                            "nb_dispo" = "nb_dispo.x", "latitude" = "Latitude.x",
+                            "longitude" = "Longitude.x", "id_hote" = "id_hote.x",
+                            "tauxfreq" = "tauxfreq.x")
+annee2 <- annee2 %>% filter(!is.na(prix))
+
+# on transforme en objet sf en joignant l'id carre
+join <- individuel_clean_sf %>% select(id_logement, id_carre, id_iris)
+annee2_sf <- left_join(annee2, join, by = "id_logement")
+annee2_sf <- annee2_sf %>% select(-geom)
+annee2_sf <- st_as_sf(annee2_sf, coords = c("longitude", "latitude"), crs = 4326)
+```
+
+
+```{r}
+annee_actifs <- annee %>% filter(nb_dispo > 0 | nb_nuitees > 0)
+annee_reserves <- annee %>% filter(nb_nuitees > 0)
+annee2_actifs <- annee2 %>% filter(nb_dispo > 0 | nb_nuitees > 0)
+annee2_reserves <- annee2 %>% filter(nb_nuitees > 0)
+
+entire <- annee_reserves %>% filter(type == "Entire home/apt")
+private <- annee_reserves %>% filter(type == "Private room")
+entire2 <- annee2_reserves %>% filter(type == "Entire home/apt")
+private2 <- annee2_reserves %>% filter(type == "Private room")
+```
+
+
+```{r, eval = FALSE}
+quali <- annee_reserves
+quali$freq <- cut(quali$Freq, c(0,1,12))
+quali$type <- as.factor(quali$type)
+quali$freq <- as.character(quali$freq)
+quali$freq[quali$freq == "(0,1]"] <- "1 logement"
+quali$freq[quali$freq == "(1,12]"] <- "2 logements ou +"
+quali$freq <- as.factor(quali$freq)
+
+ggplot(data = quali, aes(x = freq))+
+  geom_bar(aes(fill = type), position = "fill")
+
+quali2 <- quali %>% filter(type != "Entire home/apt" & Freq >= 2)
+nrow(quali2) / nrow(quali %>% filter(Freq >= 2))*100
+# x% des logements loués par des multiloueurs sont des chambres privées ou partagées
+```
+
+## Etat des lieux sur l'importance, la structure et la performance de l'offre Airbnb à `r commune` (`r periode`)
+
+En `r periode`, on compte `r nrow(annee)` logements inscrits sur la plateforme Airbnb à `r commune`, ce qui représente environ `r (nrow(annee) * 100 / log[1,21]) %>% round(digits = 1)`% de la totalité du marché du logement dans la commune[^1]. A titre de comparaison, on compte `r hotels[1,12]` chambres d'hôtel dans la commune[^2]. `r nrow(annee_actifs)` des logements Airbnb ont été proposés à la location au moins une fois sur l'année, et `r nrow(annee_reserves)` ont enregistré au moins une réservation. Un hôte qui rend son logement disponible a donc `r (nrow(annee_reserves) * 100 / nrow(annee_actifs)) %>% round(digits = 0)`% de chance d'engendrer une réservation. Les indicateurs calculés sur le tableau suivant prennent comme stock de référence ces `r nrow(annee_reserves)` logements réservés, dont `r nrow(entire)` sont des logements entiers, et `r nrow(private)` des chambres privées.
+
+```{r}
+indicateur <- data.frame(matrix(ncol = 4, nrow = 11))
+colnames(indicateur) <- c(paste("Indicateur (", periode ,")"), "Tous les logements", "Logements entiers", "Chambres privées")
+indicateur[ ,1] <- c("Taux d'activité (%)", "Prix par personne moyen (\\$)", "Taux de fréquentation moyen (%)", "Nombre moyen de nuitées disponibles", "Nombre moyen de nuitées réservées", "Part de logements loués fréquemment (>= 120 nuitées)", "Part de logements loués occasionnellement (<= 7 nuitées)", "Part des séjours de moins de 7 jours", "Part des séjours de 15 jours ou plus", "Part de logements détenus par des multiloueurs", "Revenu médian engendré par logement (\\$)")
+
+indicateur[1,2] <- nrow(annee_reserves) * 100 / nrow(annee_actifs)
+indicateur[1,3] <- nrow(entire) * 100 / nrow(annee_actifs %>% filter(type == "Entire home/apt"))
+indicateur[1,4] <- nrow(private) * 100 / nrow(annee_actifs %>% filter(type == "Private room"))
+
+indicateur[2,2] <- mean(annee_reserves$prixpers)
+indicateur[2,3] <- mean(entire$prixpers)
+indicateur[2,4] <- mean(private$prixpers)
+
+indicateur[3,2] <- sum(annee_reserves$nb_nuitees) * 100 / (sum(annee_reserves$nb_nuitees) + sum(annee_reserves$nb_dispo))
+indicateur[3,3] <- sum(entire$nb_nuitees) * 100 / (sum(entire$nb_nuitees) + sum(entire$nb_dispo))
+indicateur[3,4] <- sum(private$nb_nuitees) * 100 / (sum(private$nb_nuitees) + sum(private$nb_dispo))
+
+indicateur[4,2] <- mean(annee_reserves$nb_dispo + annee_reserves$nb_nuitees)
+indicateur[4,3] <- mean(entire$nb_dispo + entire$nb_nuitees)
+indicateur[4,4] <- mean(private$nb_dispo + private$nb_nuitees)
+
+indicateur[5,2] <- mean(annee_reserves$nb_nuitees)
+indicateur[5,3] <- mean(entire$nb_nuitees)
+indicateur[5,4] <- mean(private$nb_nuitees)
+
+indicateur[6,2] <- nrow(annee_reserves %>% filter(nb_nuitees >= 120)) * 100 / nrow(annee_reserves)
+indicateur[6,3] <- nrow(entire %>% filter(nb_nuitees >= 120)) * 100 / nrow(entire)
+indicateur[6,4] <- nrow(private %>% filter(nb_nuitees >= 120)) * 100 / nrow(private)
+
+indicateur[7,2] <- nrow(annee_reserves %>% filter(nb_nuitees <= 7)) * 100 / nrow(annee_reserves)
+indicateur[7,3] <- nrow(entire %>% filter(nb_nuitees <= 7)) * 100 / nrow(entire)
+indicateur[7,4] <- nrow(private %>% filter(nb_nuitees <= 7)) * 100 / nrow(private)
+
+indicateur[8,2] <- nrow(annee_reserves %>% filter(duree < 7)) * 100 / nrow(annee_reserves)
+indicateur[8,3] <- nrow(entire %>% filter(duree < 7)) * 100 / nrow(entire)
+indicateur[8,4] <- nrow(private %>% filter(duree < 7)) * 100 / nrow(private)
+
+indicateur[9,2] <- nrow(annee_reserves %>% filter(duree >= 15)) * 100 / nrow(annee_reserves)
+indicateur[9,3] <- nrow(entire %>% filter(duree >= 15)) * 100 / nrow(entire)
+indicateur[9,4] <- nrow(private %>% filter(duree >= 15)) * 100 / nrow(private)
+
+indicateur[10,2] <- nrow(annee_reserves %>% filter(multi == TRUE)) * 100 / nrow(annee_reserves)
+indicateur[10,3] <- nrow(entire %>% filter(multi == TRUE)) * 100 / nrow(entire)
+indicateur[10,4] <- nrow(private %>% filter(multi == TRUE)) * 100 / nrow(private)
+
+indicateur[11,2] <- median(annee_reserves$rev_tot)
+indicateur[11,3] <- median(entire$rev_tot)
+indicateur[11,4] <- median(private$rev_tot)
+
+indicateur[1,1] <- paste0(indicateur[1,1], footnote_marker_alphabet(1))
+
+kable(indicateur, align = "c", escape = F, digits = 0) %>%
+  kable_paper(full_width = F) %>%
+  footnote(alphabet = "Le taux d'activité désigne le nombre de logements réservés par rapport au nombre de logements actifs") %>%
+  column_spec(1, bold = TRUE)
+```
+
+
+```{r}
+# Sur ces `r nrow(annee_reserves)` logements, `r nrow(annee_reserves %>% filter(type == "Entire home/apt"))` sont des logements entiers (`r (nrow(annee_reserves %>% filter(type == "Entire home/apt")) * 100 / nrow(annee_reserves)) %>% round(digits = 0)`%), et `r nrow(annee_reserves %>% filter(type == "Private room"))` des chambres privées. Le nombre de chambres partagées est négligeable.
+
+# Le prix moyen par personne par nuitée d'un logement est de `r (mean(annee_reserves$prixpers)) %>% round(digits = 1)`\$. Comptez `r (mean(entire$prixpers)) %>% round(digits = 1)`\$ pour un logement entier et `r (mean(private$prixpers)) %>% round(digits = 1)`\$ pour une chambre privée.
+
+# Le taux de fréquentation (nombre de nuitées réservées par rapport au nombre de nuitées disponibles) est de `r (sum(annee_reserves$nb_nuitees) * 100 / (sum(annee_reserves$nb_nuitees) + sum(annee_reserves$nb_dispo))) %>% round(digits = 1)`%. Il est de `r (sum(entire$nb_nuitees) * 100 / (sum(entire$nb_nuitees) + sum(entire$nb_dispo))) %>% round(digits = 1)`% parmi les logements entiers et `r (sum(private$nb_nuitees) * 100 / (sum(private$nb_nuitees) + sum(private$nb_dispo))) %>% round(digits = 1)`% pour les chambres privées
+
+# En moyenne, un logement a proposé `r (mean(annee_reserves$nb_dispo) + mean(annee_reserves$nb_nuitees)) %>% round(digits = 1)` nuitées en `r periode`, et `r (mean(annee_reserves$nb_nuitees)) %>% round(digits = 1)` ont été réservées, soit `r (mean(annee_reserves$nb_nuitees) * 100 / (mean(annee_reserves$nb_dispo) + mean(annee_reserves$nb_nuitees))) %>% round(digits = 1)`%. Lorsque l'on découpe le nombre de nuitées réservées en classes, on peut distinguer les loueurs occasionnels (< 7 nuitées) des plus fréquents (> 120 nuitées) : `r tab$Pourcentage[5]`% des logements font partie de cette dernière catégorie.
+```
+
+### Un marché concentré ?
+
+```{r fig.asp = 1, fig.width = 4, align = "left"}
+breaks <- seq(0, max(annee_reserves$nb_nuitees), by = 1)
+
+test <- annee_reserves
+test$nb_log <- 1
+test$intervalle <- findInterval(test$nb_nuitees, vec = breaks)
+test$intervalle <- breaks[test$intervalle]
+dist <- aggregate(test$nb_nuitees, by = list(test$intervalle), sum)
+
+dist$freq <- cumsum(dist$x)
+dist$nb_log <- dist$x / dist$Group.1
+
+dist$cumul <- dist$freq/dist[nrow(dist), 3]* 100
+dist$cumul <- dist$cumul %>% round(digits = 2)
+
+dist$cumul_log <- cumsum(dist$nb_log)
+dist$cumul_log <- dist$cumul_log / max(dist$cumul_log)
+dist$cumul_log <- dist$cumul_log * 100
+dist$cumul_log <- dist$cumul_log %>% round(digits = 2)
+
+colnames(dist) <- c("nb_nuitees", "nb_nuitees_tot", "cumul", "nb_log", "cumulpct", "cumul_log")
+
+dist$cumulpct <- 100 -dist$cumulpct
+dist$cumul_log <- 100 -dist$cumul_log
+
+ref_x <- dist %>% filter(abs(cumul_log-20) == min(abs(cumul_log-20)))
+ref_x <- ref_x[1,6]
+val_y <- dist %>% filter(cumul_log == ref_x)
+val_y <- val_y[1,5]
+
+plot1 <- ggplot(data = dist, aes(x = cumul_log, y = cumulpct))+
+  geom_line() +
+  labs(title = "Nuitées engendrées par les hôtes",
+       x = "Effectif cumulé des logements Airbnb (%)",
+       y = "Nombre total de nuitées réservées (%)",
+       caption = paste("source : airdna.co,", periode)) +
+  scale_x_continuous(breaks = seq(0,100,10)) +
+  scale_y_continuous(breaks = seq(0,100,10)) + 
+  geom_segment(aes(x = ref_x, 
+    y = 0, xend = ref_x, yend = val_y), linetype = "dashed", colour = "black") + 
+    geom_segment(aes(x = 0, y = val_y, xend = ref_x, yend = val_y), linetype = "dashed", colour = "black") + geom_point(aes(x = ref_x, y = val_y), shape = 21, fill = "white", colour = "black", size = 4, stroke = 2) + 
+ggplot2::annotate("text", x = ref_x + 5, y = val_y, label = paste0(round((ref_x)), " % des logements concentrent \n ", (val_y), "% des nuitées Airbnb"), 
+    vjust = 1, hjust = 0, colour = "black")
+```
+
+```{r fig.asp = 1, fig.width = 4, align = "right"}
+breaks4 <- seq(0, max(annee_reserves$rev_tot), by = 1)
+
+test4 <- annee_actifs
+test4$nb_log <- 1
+test4$intervalle <- findInterval(test4$rev_tot, vec = breaks4)
+test4$intervalle <- breaks4[test4$intervalle]
+dist4 <- aggregate(test4$rev_tot, by = list(test4$intervalle), sum)
+
+dist4$freq <- cumsum(dist4$x)
+dist4$nb_log <- dist4$x / dist4$Group.1
+dist4$nb_log[1] <- nrow(annee_reserves %>% filter(rev_tot == 0))
+
+dist4$cumul <- dist4$freq/dist4[nrow(dist4), 3]* 100
+dist4$cumul <- dist4$cumul %>% round(digits = 2)
+
+dist4$cumul_log <- cumsum(dist4$nb_log)
+dist4$cumul_log <- dist4$cumul_log / max(dist4$cumul_log)
+dist4$cumul_log <- dist4$cumul_log * 100
+dist4$cumul_log <- dist4$cumul_log %>% round(digits = 2)
+
+colnames(dist4) <- c("rev_tot", "rev_tot_tot", "cumul", "nb_log", "cumulpct", "cumul_log")
+
+dist4$cumulpct <- 100 -dist4$cumulpct
+dist4$cumul_log <- 100 -dist4$cumul_log
+
+ref_x2 <- dist4 %>% filter(abs(cumul_log-20) == min(abs(cumul_log-20)))
+ref_x2 <- ref_x2[1,6]
+val_y2 <- dist4 %>% filter(cumul_log == ref_x2)
+val_y2 <- val_y2[1,5]
+
+plot2 <- ggplot(data = dist4, aes(x = cumul_log, y = cumulpct))+
+  geom_line() +
+  labs(title = "Revenus totaux engendrés par les hôtes",
+       x = "Effectif cumulé des logements Airbnb (%)",
+       y = "Revenus totaux (%)",
+       caption = paste("source : airdna.co,", periode)) +
+  xlim(0,100) +
+  scale_x_continuous(breaks = seq(0,100,10)) +
+  scale_y_continuous(breaks = seq(0,100,10)) + 
+  geom_segment(aes(x = ref_x2, 
+    y = 0, xend = ref_x2, yend = val_y2), linetype = "dashed", colour = "black") + 
+    geom_segment(aes(x = 0, y = val_y2, xend = ref_x2, yend = val_y2), linetype = "dashed", colour = "black") + geom_point(aes(x = ref_x2, y = val_y2), shape = 21, fill = "white", colour = "black", size = 4, stroke = 2) + 
+ggplot2::annotate("text", x = ref_x2 + 5, y = val_y2, label = paste0(round((ref_x2)), " % des logements concentrent \n ", (val_y2), "% des revenus"), 
+    vjust = 1, hjust = 0, colour = "black")
+```
+
+Les nuitées sont assez concentrées dans un petit nombre de logements : en effet, `r round(ref_x)`% des logements concentrent `r round(val_y)`% des nuitées réservées de la commune. Lorsque l'on s'intéresse aux revenus engrangés, on observe que `r round(ref_x2)`% des logements concentrent près des `r round(val_y2)`% de la totalité des revenus générés par Airbnb en `r periode` à `r commune`.
+
+```{r}
+library(gridExtra) # pour mettre 2 graphiques côte à côte
+grid.arrange(plot1, plot2, ncol = 2)
+```
+
+```{r fig.asp = 1, fig.width = 3, align = "right"}
+# Focus sur les hôtes qui engrangent le plus de revenus dans un petit encadré
+hotes_riches <- annee_reserves %>% group_by(id_hote) %>%
+  summarise(revtot = (sum(rev_tot)) %>% round(digits = 0), id_hote = id_hote, Freq = Freq)
+
+hotes_riches <- hotes_riches[order(-hotes_riches$revtot),]
+hotes_riches <- hotes_riches %>% unique()
+hotes_riches <- tibble::rownames_to_column(hotes_riches, "rang")
+hotes_riches <- hotes_riches[-2]
+colnames(hotes_riches) <- c("Rang", paste("Revenus en ", periode, "(\\$)"), "Nombre de logements")
+sum <- (max(hotes_riches[, 2]) * 100 / sum(annee_reserves$rev_tot)) %>% round(digits = 2)
+```
+
+
+<br/><br/> <div style= "float:right;position: relative; top: -30px;">
+```{r fig.asp = 1, fig.width = 3, position = "float right"}
+knitr::kable(head(hotes_riches, 5), caption = paste("<center><strong>Top hôtes</strong></center>", periode))
+```
+
+```{r}
+options(scipen = 3)
+hotes_riches <- hotes_riches %>% rename("nblog" = "Nombre de logements")
+```
+
+
+</div><br/>
+<br/> 
+En regardant les hôtes qui engrangent le plus de revenus, on trouve un multiloueur qui a lui seul près de `r (hotes_riches[1,2]) %>% round(digits = -3)`\$, soit `r sum`% de la totalité des revenus engendrés par le marché Airbnb à `r commune` en `r periode`. Sur les 5 hôtes engrangeant le plus de revenus, `r nrow(head(hotes_riches, 5) %>% filter(nblog == 1))` sont monoloueurs.
+<br/><br/><br/><br/>
+
+
+## Analyse temporelle `r min(mensuel_clean$year)`-`r periode2`
+
+
+```{r}
+annee <- mutate(annee,
+                activite = case_when(
+                  annee$nb_dispo == 0 & annee$nb_nuitees == 0 ~ "Jamais proposé",
+                  annee$nb_dispo > 0 & annee$nb_nuitees == 0 ~ "Proposé, jamais réservé",
+                  annee$nb_nuitees > 0 ~ "Réservé au moins une fois"
+                  ))
+
+annee2 <- mutate(annee2,
+                activite = case_when(
+                  annee2$nb_dispo == 0 & annee2$nb_nuitees == 0 ~ "Jamais proposé",
+                  annee2$nb_dispo > 0 & annee2$nb_nuitees == 0 ~ "Proposé, jamais réservé",
+                  annee2$nb_nuitees > 0 ~ "Réservé au moins une fois"
+                  ))
+
+
+test <- merge(annee, annee2, by = "id_logement")
+test$negatif <- test$nb_nuitees.x - test$nb_nuitees.y
+test$tauxfreq_n0 <- test$nb_nuitees.x * 100 / (test$nb_dispo.x + test$nb_nuitees.x)
+test$tauxfreq_n1 <- test$nb_nuitees.y * 100 / (test$nb_dispo.y + test$nb_nuitees.y)
+test$baisse <- ((test$tauxfreq_n1 - test$tauxfreq_n0) / test$tauxfreq_n0) * 100
+test <- test %>% filter(!is.na(baisse))
+test <- test %>% filter(baisse < 999999)
+
+tauxfreq_entire_n1 <- sum(entire$nb_nuitees) * 100 / (sum(entire$nb_dispo) + sum(entire$nb_nuitees))
+tauxfreq_entire_n2 <- sum(entire2$nb_nuitees) * 100 / (sum(entire2$nb_dispo) + sum(entire2$nb_nuitees))
+evol_entire <- ((tauxfreq_entire_n2 - tauxfreq_entire_n1) / tauxfreq_entire_n1 * 100) %>% round(digits = 2)
+
+tauxfreq_private_n1 <- sum(private$nb_nuitees) * 100 / (sum(private$nb_dispo) + sum(private$nb_nuitees))
+tauxfreq_private_n2 <- sum(private2$nb_nuitees) * 100 / (sum(private2$nb_dispo) + sum(private2$nb_nuitees))
+evol_private <- ((tauxfreq_private_n2 - tauxfreq_private_n1) / tauxfreq_private_n1 * 100) %>% round(digits = 2)
+```
+<br/>
+L'arrêt de l'activité du marché Airbnb à `r commune` s'observe tout d'abord au niveau du nombre de locations réservées : entre `r periode` et `r periode2`, elles ont subi une chute de `r -(((nrow(annee2_reserves) - nrow(annee_reserves)) / nrow(annee_reserves)) * 100) %>% round(digits = 0)`%, passant de `r nrow(annee_reserves)` à `r nrow(annee2_reserves)` unités.
+Les courbes ci-dessus montrent un déclin du nombre de nuitées réservées à partir de mars 2020, lors de la période de restriction des déplacements. En effet, on observe une chute moyenne de `r -(mean(test$baisse)) %>% round(digits = 0)`% du taux de fréquentation par logement de `r periode` à `r periode2` Seul `r (nrow(test %>% filter(negatif < 0)) * 100 / nrow(test)) %>% round(digits = 1)`% des logements ont connu une hausse du nombre de leur visites entre `r periode` et `r periode2`
+Enfin, l'arrêt du tourisme se ressent au niveau des revenus : ils sont passés de près de `r (sum(annee_reserves$rev_tot)) %>% round(digits = -5)`\$  en `r periode` à `r (sum(annee2_reserves$rev_tot)) %>% round(digits = -5)`\$ en `r periode2`. 
+
+
+### activité
+
+
+```{r}
+# Les logements entiers engendraient `r (sum(entire$rev_tot) * 100 /sum(annee_reserves$rev_tot)) %>% round(digits = 0)`% des revenus totaux de la commune en `r periode`, contre `r (sum(entire2$rev_tot) * 100 /sum(annee2_reserves$rev_tot)) %>% round(digits = 0)`% en `r periode2`. On observe un léger fléchissement de la tendance, malgré une baisse similaire de l'effectif de ces logements (respectivement `r ((nrow(entire2) - nrow(entire))* 100 / nrow(entire)) %>% round(digits = 2)` et `r ((nrow(private2) - nrow(private))* 100 / nrow(private)) %>% round(digits = 2)`%) . De plus, la baisse de fréquentation entre `r periode` et `r periode2` est moins marquée chez les chambres privées (`r evol_private`%) que parmi les logements entiers (`r evol_entire`%). Les chambres privées sont-elles les grandes gagnantes d'un marché déstructuré ?
+
+reserves_n0 <- annee_reserves %>% select(id_logement, nb_nuitees, nb_dispo)
+reserves_n0 <- reserves_n0 %>% rename("nb_nuitees_n0" = "nb_nuitees", "nb_dispo_n0" = "nb_dispo")
+reserves_n1 <- annee2_reserves %>% select(id_logement, nb_nuitees, nb_dispo)
+reserves_n1 <- reserves_n1 %>% rename("nb_nuitees_n1" = "nb_nuitees", "nb_dispo_n1" = "nb_dispo")
+
+fracas <- left_join(reserves_n0, reserves_n1, by = "id_logement", all.x = TRUE)
+join <- individuel_clean_sf %>% select(id_logement, id_carre)
+fracas <- left_join(join, fracas, by = "id_logement")
+fracas <- na.omit(fracas) # 293 logements sont réservés à la fois en 2019 et en 2020
+
+tab <- as.data.frame(table(fracas$id_carre))
+tab <- tab %>% rename("id_carre" = "Var1", "nb_log" = "Freq")
+
+fracas <- fracas %>% group_by(id_carre) %>%
+  summarise(nb_nuitees_n0 = sum(nb_nuitees_n0), nb_dispo_n0 = sum(nb_dispo_n0), nb_nuitees_n1 = sum(nb_nuitees_n1), nb_dispo_n1 = sum(nb_dispo_n1)) %>%
+  mutate(tauxfreq_n0 = (nb_nuitees_n0 * 100 / (nb_nuitees_n0 + nb_dispo_n0)), tauxfreq_n1 = (nb_nuitees_n1 * 100 / (nb_nuitees_n1 + nb_dispo_n1))) %>%
+  select(id_carre, tauxfreq_n0, tauxfreq_n1) %>%
+  mutate(evol = (((tauxfreq_n1 - tauxfreq_n0) / tauxfreq_n0) * 100)) %>%
+  select(id_carre, evol) %>%
+  filter(evol < 999999) # pour enlever les Inf
+
+fracas <- merge(fracas, tab, by = "id_carre")
+```
+
+
+```{r}
+# On crée la colonne jours_tot correspondant au nb de jours totaux durant lesquels le logement est en capacité d'être réservé
+mois_actifs <- mensuel_clean %>% filter(nb_dispo > 0 | nb_nuitees > 0)
+mois_actifs$jours_tot <- mois_actifs$nb_dispo + mois_actifs$nb_nuitees
+
+# puis on group_by les mois réservés en additionnant les jours réservés et le nombre de jours totaux
+months <- mois_actifs %>%
+  group_by(mois) %>%
+  summarise(nb_dispo = sum(jours_tot), nb_resa = sum(nb_nuitees))
+
+months <- months %>% mutate("Nombre de nuitées disponibles" = nb_dispo - nb_resa)
+months <- months %>% rename("Nombre de nuitées réservées" = nb_resa)
+empil <- months %>% 
+  gather("Nombre de nuitées disponibles", "Nombre de nuitées réservées", key = etat, value = count) %>% 
+  mutate(month = format(mois, format = "%Y-%m")) %>%
+  select(-mois, nb_dispo)
+
+p <- ggplot(data = empil, aes(x = month, y = count)) +
+  geom_col(stat = 'identity', aes(fill = etat, width = 0.7)) +
+  labs(title = "Réservations vs disponibilité",
+       x = "Date",
+       y = "Nombre de nutiées par mois",
+       fill = "",
+       caption = paste0("source : airdna.co, ", commune, ", novembre 2020")) +
+  scale_colour_manual(name = "Légende", labels = c("Nombre de nuitées disponibles", "Nombre de nuitées réservées"), values = c("nb_dispo", "count")) +
+  theme(legend.position = c(0.8,0.95),
+        legend.background = element_rect(fill = NA)) +
+  scale_x_discrete(breaks = c("2015-08", "2016-08", "2017-08", "2018-08", "2019-08", "2020-08"))
+p
+```
+
+ <br/> <br/> <div style= "float:left;position: relative; top: -10px;">
+```{r fig.height = 4, fig.width = 5.5, align = "left"}
+mois_reserves <- mensuel_clean %>% filter(nb_nuitees > 0)
+  
+bilan2015 <- mois_reserves %>%
+  filter(year == 2015) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2015 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2015)
+  
+bilan2016 <- mois_reserves %>%
+  filter(year == 2016) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2016 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2016)
+
+bilan2017 <- mois_reserves %>%
+  filter(year == 2017) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2017 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2017)
+
+bilan2018 <- mois_reserves %>%
+  filter(year == 2018) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2018 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2018)
+
+bilan2019 <- mois_reserves %>%
+  filter(year == 2019) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2019 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2019)
+
+bilan2020 <- mois_reserves %>%
+  filter(year == 2020) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2020 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2020)
+
+# merge en 1 seul tableau pour préparer le graphique
+plotfreq <- merge(bilan2015, bilan2016, by = "month", all = TRUE)
+plotfreq <- merge(plotfreq, bilan2017, by = "month", all = TRUE)
+plotfreq <- merge(plotfreq, bilan2018, by = "month", all = TRUE)
+plotfreq <- merge(plotfreq, bilan2019, by = "month", all = TRUE)
+plotfreq <- merge(plotfreq, bilan2020, by = "month", all = TRUE)
+
+
+saison <- ggplot(data = plotfreq,
+                 aes(x = month, group = 1)) +
+  geom_line(stat = "identity", aes(y = tauxfreq2015, colour = "tauxfreq2015")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2016, colour = "tauxfreq2016")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2017, colour = "tauxfreq2017")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2018, colour = "tauxfreq2018")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2019, colour = "tauxfreq2019")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2020, colour = "tauxfreq2020")) +
+  # scale_fill_brewer(palette = "PuBu") +
+  scale_colour_manual(name = "Année", labels = c("2015", "2016", "2017", "2018", "2019", "2020"), values = c("tauxfreq2015" = "grey69", "tauxfreq2016" = "dodgerblue1", "tauxfreq2017" = "dodgerblue2", "tauxfreq2018" = "dodgerblue3", "tauxfreq2019" = "dodgerblue4", "tauxfreq2020" = "red2")) +
+  xlab("Mois") +
+  scale_y_continuous("Taux de fréquentation (%)") +
+  labs(title = "Saisonnalité des logements Airbnb",
+       subtitle = "Parmi les logements réservés",
+       caption = "source : airdna.co, novembre 2020")+
+  theme_bw()
+# méthode : pour chaque mois calculer le taux de fréquentation en divisant la somme des nuitées
+# réservées par la somme des nuitées disponibles pour les logements actifs
+saison
+```
+
+</div><br/><br/>
+Les mois de juin et de septembre correspondent aux taux de fréquentation les plus élevés, tandis qu'août et novembre correspondent à des saisons creuses en raison du plus fort nombre de nuitées disponibles à ces périodes-là. Le comportement de l'année 2020 est complètement différent des autres années.
+<br/><br/><br/><br/><br/>
+
+## Analyse infra-communale
+
+
+```{r}
+# fonction pour compter le nombre de points par carré
+CountPt <- function(x, pt){
+  # Intersection avec l'objet sf de référence
+  inter <- st_intersects(x, pt)
+  # Nombre de points par objet géographique
+  v <- sapply(X = inter, FUN = length)
+  return(v)
+}
+
+annee_reserves_sf <- annee_sf %>% filter(nb_nuitees > 0)
+grillecom$count <- CountPt(grillecom, annee_reserves_sf)
+```
+
+```{r, results = 'hide'}
+# densité de points (nb logement / ha)
+grillecom$densite <- grillecom$count / grillecom$surface
+grillecom$densite <- grillecom$densite %>% round(digits = 1)
+```
+
+
+```{r}
+# pour compter la moyenne du prix par carré
+prixmedcarre <- annee_reserves_sf %>%
+  group_by(id_carre) %>%
+  summarise(prixmed = median(prixpers), nb_logement = n())
+
+# préparer la jointure
+grillecom <- tibble::rownames_to_column(grillecom, "id_carre") # enlever/ajouter un # si ça ne marche pas
+grillecom$id_carre <- as.numeric(grillecom$id_carre)
+
+# jointure
+test <- st_join(grillecom, prixmedcarre)
+test$prixmed <- test$prixmed %>% round(digits = 2)
+```
+
+
+
+```{r}
+test <- test %>% filter(surface > 0.3) # car valeurs trop élevées si 1 logement sur une petite partie d'un carreau
+
+bins <- getBreaks(v = test$prixmed, nclass = 6, method = "fisher-jenks")
+pal <- colorBin("YlOrRd", domain = test$prixmed, bins = bins)
+labels <- sprintf(
+  "<strong>%s logements réservés</strong><br/> Prix médian : %g $ / personne",
+  test$nb_logement, test$prixmed
+) %>% lapply(htmltools::HTML)
+
+bins2 <- getBreaks(v = test$densite, nclass = 6, method = "fisher-jenks")
+pal2 <- colorBin("Blues", domain = test$densite, bin = bins2)
+labels2 <- sprintf(
+  "Densité : %s logement / hectare",
+  test$densite
+) %>% lapply(htmltools::HTML)
+
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = test,
+              group = "Densité (logements/ha)", 
+              fillColor = ~pal2(densite),
+              weight = 2,
+              opacity = 1,
+              color = "white",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 5,
+                color = "666",
+                dashArray = "",
+                fillOpacity = 0.7,
+                bringToFront = TRUE),
+              label = labels2,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal", padding = "3px 8px"),
+                textsize = "15px",
+                direction = "auto"))  %>% 
+  addLegend(pal = pal2, group = "Densité (logements/ha)", values = test$densite, opacity = 0.7, title = "Nombre de logements \npar hectare", position = "bottomright") %>%
+  addPolygons(data = test,
+              group = "Prix médian ($)", 
+              fillColor = ~pal(prixmed),
+              weight = 2,
+              opacity = 1,
+              color = "white",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 5,
+                color = "666",
+                dashArray = "",
+                fillOpacity = 0.7,
+                bringToFront = TRUE),
+              label = labels,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal", padding = "3px 8px"),
+                textsize = "15px",
+                direction = "auto")) %>%
+  addLegend(pal = pal, group = "Prix médian ($)", values = test$prixmed, opacity = 0.7, title = "Prix médian \nau carroyage", position = "bottomright") %>%
+  addLayersControl(
+    #baseGroups = c("Densité (logements/ha)", "Prix médian ($)"),
+    overlayGroups = c("Densité (logements/ha)", "Prix médian ($)"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+```
+
+
+<br/>
+
+```{r}
+# taux de fréquentation moyen par iris
+avgfreqiris <- annee_reserves_sf %>%
+  group_by(id_iris) %>%
+  summarise(nb_nuitees_tot = sum(nb_nuitees), nb_logement = n(), nb_dispo_tot = sum(nb_dispo) + sum(nb_nuitees))
+
+avgfreqiris$tauxfreq <- avgfreqiris$nb_nuitees_tot * 100 / (avgfreqiris$nb_nuitees_tot + avgfreqiris$nb_dispo_tot)
+
+# jointure
+iris <- tibble::rownames_to_column(iris, "id_iris") # pour joindre via cette colonne
+iris$id_iris <- as.numeric(iris$id_iris)
+
+test <- st_join(iris, avgfreqiris)
+
+iris <- st_transform(iris, crs = 2154)
+test <- st_transform(test, crs = 2154)
+
+# carte choropolèthe
+plot(
+  st_geometry(iris),
+  col = "white",
+  border = "black",
+  bg = "white"
+)
+propSymbolsChoroLayer(
+  x = test,
+  var = "nb_nuitees_tot",
+  border = "grey50",
+  lwd = 1,
+  legend.var.pos = "topleft",
+  legend.var.title.txt = "Nombre total de nuitées réservées",
+  var2 = "tauxfreq",
+  method = "fisher-jenks",
+  nclass = 5,
+  col = carto.pal(pal1 = "orange.pal", n1 = 5),
+  legend.var2.values.rnd = 2,
+  legend.var2.pos = "bottomright",
+  legend.var2.title.txt = "Taux de \nfréquentation (%)"
+)
+layoutLayer(
+  title = paste0("Taux de fréquentation moyen des logements Airbnb à ", commune, ", ", periode), 
+  sources = "source : Airdna, décembre 2020", 
+  author = "Laurian, 2021"
+)
+```
+
+
+[^1]: Source : Nombre de Logements (totaux) des communes d'Île-de-France (Donnée INSEE), 2017. https://data-iau-idf.opendata.arcgis.com/datasets/nombre-de-logements-totaux-des-communes-dîle-de-france-donnée-insee/explore
+[^2]: Source : capacité des communes en hébergements touristiques, INSEE base 2019 https://www.insee.fr/fr/statistiques/2021703
+
+
+<br><br>
+
+# Bagneux
+
+
+
+```{r}
+# Seuls les paramètres de ce chunk sont à changer
+
+mensuel_clean <- read_csv("data/consolidated/bagneux_mensuel.csv")
+individuel_clean <- read_csv("data/consolidated/bagneux_individuel.csv")
+iris <- st_read("data/consolidated/bagneux.gpkg", layer = "iris", quiet = TRUE)
+grillecom <- st_read("data/consolidated/bagneux.gpkg", layer = "grillecom", quiet = TRUE)
+individuel_clean_sf <- st_read("data/consolidated/bagneux.gpkg", layer = "bagneux_individuel_sf", quiet = TRUE)
+
+commune <- "bagneux"
+periode <- 2019
+periode2 <- 2020
+hotels <- read_csv("data/insee/hotels_bagneux.csv")
+log <- read_csv("data/insee/log_bagneux.csv")
+```
+
+
+```{r}
+# On ne sélectionne que l'année choisie
+mois <- mensuel_clean %>% filter(year == periode)
+annee <- mois %>% select(-mois, -`Occupancy Rate`, -Active, -year, -month, -day, -activite,
+                              -actif, -duree, -tauxfreq)
+annee <- annee %>% group_by(id_logement) %>%
+  summarise(type = type, rev_tot = sum(revenus_mois), rev_nuitee = mean(revenus_nuitee, na.rm = TRUE),
+            nb_resa = sum(nb_resa), nb_nuitees = sum(nb_nuitees), nb_dispo = sum(nb_dispo),
+            nb_bloques = sum(nb_bloques), Latitude = Latitude, Longitude = Longitude,
+            id_hote = id_hote)
+annee <- annee %>% unique()
+
+# réestimation du taux de fréquentation et de la durée des séjours
+annee$tauxfreq <- annee$nb_nuitees / (annee$nb_nuitees + annee$nb_dispo)
+annee$tauxfreq <- annee$tauxfreq %>% round(digits = 2)
+
+annee$duree <- annee$nb_nuitees / annee$nb_resa
+annee$duree <- annee$duree %>% round(digits = 2)
+
+# ajout de la colonne prix et prixpers via le tableau individuel_clean
+annee <- merge(annee, individuel_clean, by = "id_logement", all.x = TRUE)# il ya des na
+annee <- annee %>% select(id_logement, type.x, rev_tot, rev_nuitee, nb_resa, nb_nuitees.x,
+                            nb_dispo.x, Latitude.x, Longitude.x, id_hote.x, tauxfreq.x, duree,
+                            Freq, titre, debut, prix, prixpers, Amenities, licence, multi, duree_min)
+
+annee <- annee %>% rename("type" = "type.x", "nb_nuitees" = "nb_nuitees.x",
+                            "nb_dispo" = "nb_dispo.x", "latitude" = "Latitude.x",
+                            "longitude" = "Longitude.x", "id_hote" = "id_hote.x",
+                            "tauxfreq" = "tauxfreq.x")
+annee <- annee %>% filter(!is.na(prix))
+
+# on transforme en objet sf en joignant l'id carre
+join <- individuel_clean_sf %>% select(id_logement, id_carre, id_iris)
+annee_sf <- left_join(annee, join, by = "id_logement")
+annee_sf <- annee_sf %>% select(-geom)
+annee_sf <- st_as_sf(annee_sf, coords = c("longitude", "latitude"), crs = 4326)
+
+# On effectue la même manip pour la période 2
+mois2 <- mensuel_clean %>% filter(year == periode2)
+annee2 <- mois2 %>% select(-mois, -`Occupancy Rate`, -Active, -year, -month, -day, -activite,
+                              -actif, -duree, -tauxfreq)
+annee2 <- annee2 %>% group_by(id_logement) %>%
+  summarise(type = type, rev_tot = sum(revenus_mois), rev_nuitee = mean(revenus_nuitee, na.rm = TRUE),
+            nb_resa = sum(nb_resa), nb_nuitees = sum(nb_nuitees), nb_dispo = sum(nb_dispo),
+            nb_bloques = sum(nb_bloques), Latitude = Latitude, Longitude = Longitude,
+            id_hote = id_hote)
+annee2 <- annee2 %>% unique()
+
+# réestimation du taux de fréquentation et de la durée des séjours
+annee2$tauxfreq <- annee2$nb_nuitees / (annee2$nb_nuitees + annee2$nb_dispo)
+annee2$tauxfreq <- annee2$tauxfreq %>% round(digits = 2)
+
+annee2$duree <- annee2$nb_nuitees / annee2$nb_resa
+annee2$duree <- annee2$duree %>% round(digits = 2)
+
+# ajout de la colonne prix et prixpers via le tableau individuel_clean
+annee2 <- merge(annee2, individuel_clean, by = "id_logement", all.x = TRUE)# il ya des na
+annee2 <- annee2 %>% select(id_logement, type.x, rev_tot, rev_nuitee, nb_resa, nb_nuitees.x,
+                            nb_dispo.x, Latitude.x, Longitude.x, id_hote.x, tauxfreq.x, duree,
+                            Freq, titre, debut, prix, prixpers, Amenities, licence, multi, duree_min)
+
+annee2 <- annee2 %>% rename("type" = "type.x", "nb_nuitees" = "nb_nuitees.x",
+                            "nb_dispo" = "nb_dispo.x", "latitude" = "Latitude.x",
+                            "longitude" = "Longitude.x", "id_hote" = "id_hote.x",
+                            "tauxfreq" = "tauxfreq.x")
+annee2 <- annee2 %>% filter(!is.na(prix))
+
+# on transforme en objet sf en joignant l'id carre
+join <- individuel_clean_sf %>% select(id_logement, id_carre, id_iris)
+annee2_sf <- left_join(annee2, join, by = "id_logement")
+annee2_sf <- annee2_sf %>% select(-geom)
+annee2_sf <- st_as_sf(annee2_sf, coords = c("longitude", "latitude"), crs = 4326)
+```
+
+
+```{r}
+annee_actifs <- annee %>% filter(nb_dispo > 0 | nb_nuitees > 0)
+annee_reserves <- annee %>% filter(nb_nuitees > 0)
+annee2_actifs <- annee2 %>% filter(nb_dispo > 0 | nb_nuitees > 0)
+annee2_reserves <- annee2 %>% filter(nb_nuitees > 0)
+
+entire <- annee_reserves %>% filter(type == "Entire home/apt")
+private <- annee_reserves %>% filter(type == "Private room")
+entire2 <- annee2_reserves %>% filter(type == "Entire home/apt")
+private2 <- annee2_reserves %>% filter(type == "Private room")
+```
+
+
+```{r, eval = FALSE}
+quali <- annee_reserves
+quali$freq <- cut(quali$Freq, c(0,1,12))
+quali$type <- as.factor(quali$type)
+quali$freq <- as.character(quali$freq)
+quali$freq[quali$freq == "(0,1]"] <- "1 logement"
+quali$freq[quali$freq == "(1,12]"] <- "2 logements ou +"
+quali$freq <- as.factor(quali$freq)
+
+ggplot(data = quali, aes(x = freq))+
+  geom_bar(aes(fill = type), position = "fill")
+
+quali2 <- quali %>% filter(type != "Entire home/apt" & Freq >= 2)
+nrow(quali2) / nrow(quali %>% filter(Freq >= 2))*100
+# x% des logements loués par des multiloueurs sont des chambres privées ou partagées
+```
+
+## Etat des lieux sur l'importance, la structure et la performance de l'offre Airbnb à `r commune` (`r periode`)
+
+En `r periode`, on compte `r nrow(annee)` logements inscrits sur la plateforme Airbnb à `r commune`, ce qui représente environ `r (nrow(annee) * 100 / log[1,21]) %>% round(digits = 1)`% de la totalité du marché du logement dans la commune[^1]. A titre de comparaison, on compte `r hotels[1,12]` chambres d'hôtel dans la commune[^2]. `r nrow(annee_actifs)` des logements Airbnb ont été proposés à la location au moins une fois sur l'année, et `r nrow(annee_reserves)` ont enregistré au moins une réservation. Un hôte qui rend son logement disponible a donc `r (nrow(annee_reserves) * 100 / nrow(annee_actifs)) %>% round(digits = 0)`% de chance d'engendrer une réservation. Les indicateurs calculés sur le tableau suivant prennent comme stock de référence ces `r nrow(annee_reserves)` logements réservés, dont `r nrow(entire)` sont des logements entiers, et `r nrow(private)` des chambres privées.
+
+```{r}
+indicateur <- data.frame(matrix(ncol = 4, nrow = 11))
+colnames(indicateur) <- c(paste("Indicateur (", periode ,")"), "Tous les logements", "Logements entiers", "Chambres privées")
+indicateur[ ,1] <- c("Taux d'activité (%)", "Prix par personne moyen (\\$)", "Taux de fréquentation moyen (%)", "Nombre moyen de nuitées disponibles", "Nombre moyen de nuitées réservées", "Part de logements loués fréquemment (>= 120 nuitées)", "Part de logements loués occasionnellement (<= 7 nuitées)", "Part des séjours de moins de 7 jours", "Part des séjours de 15 jours ou plus", "Part de logements détenus par des multiloueurs", "Revenu médian engendré par logement (\\$)")
+
+indicateur[1,2] <- nrow(annee_reserves) * 100 / nrow(annee_actifs)
+indicateur[1,3] <- nrow(entire) * 100 / nrow(annee_actifs %>% filter(type == "Entire home/apt"))
+indicateur[1,4] <- nrow(private) * 100 / nrow(annee_actifs %>% filter(type == "Private room"))
+
+indicateur[2,2] <- mean(annee_reserves$prixpers)
+indicateur[2,3] <- mean(entire$prixpers)
+indicateur[2,4] <- mean(private$prixpers)
+
+indicateur[3,2] <- sum(annee_reserves$nb_nuitees) * 100 / (sum(annee_reserves$nb_nuitees) + sum(annee_reserves$nb_dispo))
+indicateur[3,3] <- sum(entire$nb_nuitees) * 100 / (sum(entire$nb_nuitees) + sum(entire$nb_dispo))
+indicateur[3,4] <- sum(private$nb_nuitees) * 100 / (sum(private$nb_nuitees) + sum(private$nb_dispo))
+
+indicateur[4,2] <- mean(annee_reserves$nb_dispo + annee_reserves$nb_nuitees)
+indicateur[4,3] <- mean(entire$nb_dispo + entire$nb_nuitees)
+indicateur[4,4] <- mean(private$nb_dispo + private$nb_nuitees)
+
+indicateur[5,2] <- mean(annee_reserves$nb_nuitees)
+indicateur[5,3] <- mean(entire$nb_nuitees)
+indicateur[5,4] <- mean(private$nb_nuitees)
+
+indicateur[6,2] <- nrow(annee_reserves %>% filter(nb_nuitees >= 120)) * 100 / nrow(annee_reserves)
+indicateur[6,3] <- nrow(entire %>% filter(nb_nuitees >= 120)) * 100 / nrow(entire)
+indicateur[6,4] <- nrow(private %>% filter(nb_nuitees >= 120)) * 100 / nrow(private)
+
+indicateur[7,2] <- nrow(annee_reserves %>% filter(nb_nuitees <= 7)) * 100 / nrow(annee_reserves)
+indicateur[7,3] <- nrow(entire %>% filter(nb_nuitees <= 7)) * 100 / nrow(entire)
+indicateur[7,4] <- nrow(private %>% filter(nb_nuitees <= 7)) * 100 / nrow(private)
+
+indicateur[8,2] <- nrow(annee_reserves %>% filter(duree < 7)) * 100 / nrow(annee_reserves)
+indicateur[8,3] <- nrow(entire %>% filter(duree < 7)) * 100 / nrow(entire)
+indicateur[8,4] <- nrow(private %>% filter(duree < 7)) * 100 / nrow(private)
+
+indicateur[9,2] <- nrow(annee_reserves %>% filter(duree >= 15)) * 100 / nrow(annee_reserves)
+indicateur[9,3] <- nrow(entire %>% filter(duree >= 15)) * 100 / nrow(entire)
+indicateur[9,4] <- nrow(private %>% filter(duree >= 15)) * 100 / nrow(private)
+
+indicateur[10,2] <- nrow(annee_reserves %>% filter(multi == TRUE)) * 100 / nrow(annee_reserves)
+indicateur[10,3] <- nrow(entire %>% filter(multi == TRUE)) * 100 / nrow(entire)
+indicateur[10,4] <- nrow(private %>% filter(multi == TRUE)) * 100 / nrow(private)
+
+indicateur[11,2] <- median(annee_reserves$rev_tot)
+indicateur[11,3] <- median(entire$rev_tot)
+indicateur[11,4] <- median(private$rev_tot)
+
+indicateur[1,1] <- paste0(indicateur[1,1], footnote_marker_alphabet(1))
+
+kable(indicateur, align = "c", escape = F, digits = 0) %>%
+  kable_paper(full_width = F) %>%
+  footnote(alphabet = "Le taux d'activité désigne le nombre de logements réservés par rapport au nombre de logements actifs") %>%
+  column_spec(1, bold = TRUE)
+```
+
+
+```{r}
+# Sur ces `r nrow(annee_reserves)` logements, `r nrow(annee_reserves %>% filter(type == "Entire home/apt"))` sont des logements entiers (`r (nrow(annee_reserves %>% filter(type == "Entire home/apt")) * 100 / nrow(annee_reserves)) %>% round(digits = 0)`%), et `r nrow(annee_reserves %>% filter(type == "Private room"))` des chambres privées. Le nombre de chambres partagées est négligeable.
+
+# Le prix moyen par personne par nuitée d'un logement est de `r (mean(annee_reserves$prixpers)) %>% round(digits = 1)`\$. Comptez `r (mean(entire$prixpers)) %>% round(digits = 1)`\$ pour un logement entier et `r (mean(private$prixpers)) %>% round(digits = 1)`\$ pour une chambre privée.
+
+# Le taux de fréquentation (nombre de nuitées réservées par rapport au nombre de nuitées disponibles) est de `r (sum(annee_reserves$nb_nuitees) * 100 / (sum(annee_reserves$nb_nuitees) + sum(annee_reserves$nb_dispo))) %>% round(digits = 1)`%. Il est de `r (sum(entire$nb_nuitees) * 100 / (sum(entire$nb_nuitees) + sum(entire$nb_dispo))) %>% round(digits = 1)`% parmi les logements entiers et `r (sum(private$nb_nuitees) * 100 / (sum(private$nb_nuitees) + sum(private$nb_dispo))) %>% round(digits = 1)`% pour les chambres privées
+
+# En moyenne, un logement a proposé `r (mean(annee_reserves$nb_dispo) + mean(annee_reserves$nb_nuitees)) %>% round(digits = 1)` nuitées en `r periode`, et `r (mean(annee_reserves$nb_nuitees)) %>% round(digits = 1)` ont été réservées, soit `r (mean(annee_reserves$nb_nuitees) * 100 / (mean(annee_reserves$nb_dispo) + mean(annee_reserves$nb_nuitees))) %>% round(digits = 1)`%. Lorsque l'on découpe le nombre de nuitées réservées en classes, on peut distinguer les loueurs occasionnels (< 7 nuitées) des plus fréquents (> 120 nuitées) : `r tab$Pourcentage[5]`% des logements font partie de cette dernière catégorie.
+```
+
+### Un marché concentré ?
+
+```{r fig.asp = 1, fig.width = 4, align = "left"}
+breaks <- seq(0, max(annee_reserves$nb_nuitees), by = 1)
+
+test <- annee_reserves
+test$nb_log <- 1
+test$intervalle <- findInterval(test$nb_nuitees, vec = breaks)
+test$intervalle <- breaks[test$intervalle]
+dist <- aggregate(test$nb_nuitees, by = list(test$intervalle), sum)
+
+dist$freq <- cumsum(dist$x)
+dist$nb_log <- dist$x / dist$Group.1
+
+dist$cumul <- dist$freq/dist[nrow(dist), 3]* 100
+dist$cumul <- dist$cumul %>% round(digits = 2)
+
+dist$cumul_log <- cumsum(dist$nb_log)
+dist$cumul_log <- dist$cumul_log / max(dist$cumul_log)
+dist$cumul_log <- dist$cumul_log * 100
+dist$cumul_log <- dist$cumul_log %>% round(digits = 2)
+
+colnames(dist) <- c("nb_nuitees", "nb_nuitees_tot", "cumul", "nb_log", "cumulpct", "cumul_log")
+
+dist$cumulpct <- 100 -dist$cumulpct
+dist$cumul_log <- 100 -dist$cumul_log
+
+ref_x <- dist %>% filter(abs(cumul_log-20) == min(abs(cumul_log-20)))
+ref_x <- ref_x[1,6]
+val_y <- dist %>% filter(cumul_log == ref_x)
+val_y <- val_y[1,5]
+
+plot1 <- ggplot(data = dist, aes(x = cumul_log, y = cumulpct))+
+  geom_line() +
+  labs(title = "Nuitées engendrées par les hôtes",
+       x = "Effectif cumulé des logements Airbnb (%)",
+       y = "Nombre total de nuitées réservées (%)",
+       caption = paste("source : airdna.co,", periode)) +
+  scale_x_continuous(breaks = seq(0,100,10)) +
+  scale_y_continuous(breaks = seq(0,100,10)) + 
+  geom_segment(aes(x = ref_x, 
+    y = 0, xend = ref_x, yend = val_y), linetype = "dashed", colour = "black") + 
+    geom_segment(aes(x = 0, y = val_y, xend = ref_x, yend = val_y), linetype = "dashed", colour = "black") + geom_point(aes(x = ref_x, y = val_y), shape = 21, fill = "white", colour = "black", size = 4, stroke = 2) + 
+ggplot2::annotate("text", x = ref_x + 5, y = val_y, label = paste0(round((ref_x)), " % des logements concentrent \n ", (val_y), "% des nuitées Airbnb"), 
+    vjust = 1, hjust = 0, colour = "black")
+```
+
+```{r fig.asp = 1, fig.width = 4, align = "right"}
+breaks4 <- seq(0, max(annee_reserves$rev_tot), by = 1)
+
+test4 <- annee_actifs
+test4$nb_log <- 1
+test4$intervalle <- findInterval(test4$rev_tot, vec = breaks4)
+test4$intervalle <- breaks4[test4$intervalle]
+dist4 <- aggregate(test4$rev_tot, by = list(test4$intervalle), sum)
+
+dist4$freq <- cumsum(dist4$x)
+dist4$nb_log <- dist4$x / dist4$Group.1
+dist4$nb_log[1] <- nrow(annee_reserves %>% filter(rev_tot == 0))
+
+dist4$cumul <- dist4$freq/dist4[nrow(dist4), 3]* 100
+dist4$cumul <- dist4$cumul %>% round(digits = 2)
+
+dist4$cumul_log <- cumsum(dist4$nb_log)
+dist4$cumul_log <- dist4$cumul_log / max(dist4$cumul_log)
+dist4$cumul_log <- dist4$cumul_log * 100
+dist4$cumul_log <- dist4$cumul_log %>% round(digits = 2)
+
+colnames(dist4) <- c("rev_tot", "rev_tot_tot", "cumul", "nb_log", "cumulpct", "cumul_log")
+
+dist4$cumulpct <- 100 -dist4$cumulpct
+dist4$cumul_log <- 100 -dist4$cumul_log
+
+ref_x2 <- dist4 %>% filter(abs(cumul_log-20) == min(abs(cumul_log-20)))
+ref_x2 <- ref_x2[1,6]
+val_y2 <- dist4 %>% filter(cumul_log == ref_x2)
+val_y2 <- val_y2[1,5]
+
+plot2 <- ggplot(data = dist4, aes(x = cumul_log, y = cumulpct))+
+  geom_line() +
+  labs(title = "Revenus totaux engendrés par les hôtes",
+       x = "Effectif cumulé des logements Airbnb (%)",
+       y = "Revenus totaux (%)",
+       caption = paste("source : airdna.co,", periode)) +
+  xlim(0,100) +
+  scale_x_continuous(breaks = seq(0,100,10)) +
+  scale_y_continuous(breaks = seq(0,100,10)) + 
+  geom_segment(aes(x = ref_x2, 
+    y = 0, xend = ref_x2, yend = val_y2), linetype = "dashed", colour = "black") + 
+    geom_segment(aes(x = 0, y = val_y2, xend = ref_x2, yend = val_y2), linetype = "dashed", colour = "black") + geom_point(aes(x = ref_x2, y = val_y2), shape = 21, fill = "white", colour = "black", size = 4, stroke = 2) + 
+ggplot2::annotate("text", x = ref_x2 + 5, y = val_y2, label = paste0(round((ref_x2)), " % des logements concentrent \n ", (val_y2), "% des revenus"), 
+    vjust = 1, hjust = 0, colour = "black")
+```
+
+Les nuitées sont assez concentrées dans un petit nombre de logements : en effet, `r round(ref_x)`% des logements concentrent `r round(val_y)`% des nuitées réservées de la commune. Lorsque l'on s'intéresse aux revenus engrangés, on observe que `r round(ref_x2)`% des logements concentrent près des `r round(val_y2)`% de la totalité des revenus générés par Airbnb en `r periode` à `r commune`.
+
+```{r}
+library(gridExtra) # pour mettre 2 graphiques côte à côte
+grid.arrange(plot1, plot2, ncol = 2)
+```
+
+```{r fig.asp = 1, fig.width = 3, align = "right"}
+# Focus sur les hôtes qui engrangent le plus de revenus dans un petit encadré
+hotes_riches <- annee_reserves %>% group_by(id_hote) %>%
+  summarise(revtot = (sum(rev_tot)) %>% round(digits = 0), id_hote = id_hote, Freq = Freq)
+
+hotes_riches <- hotes_riches[order(-hotes_riches$revtot),]
+hotes_riches <- hotes_riches %>% unique()
+hotes_riches <- tibble::rownames_to_column(hotes_riches, "rang")
+hotes_riches <- hotes_riches[-2]
+colnames(hotes_riches) <- c("Rang", paste("Revenus en ", periode, "(\\$)"), "Nombre de logements")
+sum <- (max(hotes_riches[, 2]) * 100 / sum(annee_reserves$rev_tot)) %>% round(digits = 2)
+```
+
+
+<br/><br/> <div style= "float:right;position: relative; top: -30px;">
+```{r fig.asp = 1, fig.width = 3, position = "float right"}
+knitr::kable(head(hotes_riches, 5), caption = paste("<center><strong>Top hôtes</strong></center>", periode))
+```
+
+```{r}
+options(scipen = 3)
+hotes_riches <- hotes_riches %>% rename("nblog" = "Nombre de logements")
+```
+
+
+</div><br/>
+<br/> 
+En regardant les hôtes qui engrangent le plus de revenus, on trouve un multiloueur qui a lui seul près de `r (hotes_riches[1,2]) %>% round(digits = -3)`\$, soit `r sum`% de la totalité des revenus engendrés par le marché Airbnb à `r commune` en `r periode`. Sur les 5 hôtes engrangeant le plus de revenus, `r nrow(head(hotes_riches, 5) %>% filter(nblog == 1))` sont monoloueurs.
+<br/><br/><br/><br/>
+
+
+## Analyse temporelle `r min(mensuel_clean$year)`-`r periode2`
+
+
+```{r}
+annee <- mutate(annee,
+                activite = case_when(
+                  annee$nb_dispo == 0 & annee$nb_nuitees == 0 ~ "Jamais proposé",
+                  annee$nb_dispo > 0 & annee$nb_nuitees == 0 ~ "Proposé, jamais réservé",
+                  annee$nb_nuitees > 0 ~ "Réservé au moins une fois"
+                  ))
+
+annee2 <- mutate(annee2,
+                activite = case_when(
+                  annee2$nb_dispo == 0 & annee2$nb_nuitees == 0 ~ "Jamais proposé",
+                  annee2$nb_dispo > 0 & annee2$nb_nuitees == 0 ~ "Proposé, jamais réservé",
+                  annee2$nb_nuitees > 0 ~ "Réservé au moins une fois"
+                  ))
+
+
+test <- merge(annee, annee2, by = "id_logement")
+test$negatif <- test$nb_nuitees.x - test$nb_nuitees.y
+test$tauxfreq_n0 <- test$nb_nuitees.x * 100 / (test$nb_dispo.x + test$nb_nuitees.x)
+test$tauxfreq_n1 <- test$nb_nuitees.y * 100 / (test$nb_dispo.y + test$nb_nuitees.y)
+test$baisse <- ((test$tauxfreq_n1 - test$tauxfreq_n0) / test$tauxfreq_n0) * 100
+test <- test %>% filter(!is.na(baisse))
+test <- test %>% filter(baisse < 999999)
+
+tauxfreq_entire_n1 <- sum(entire$nb_nuitees) * 100 / (sum(entire$nb_dispo) + sum(entire$nb_nuitees))
+tauxfreq_entire_n2 <- sum(entire2$nb_nuitees) * 100 / (sum(entire2$nb_dispo) + sum(entire2$nb_nuitees))
+evol_entire <- ((tauxfreq_entire_n2 - tauxfreq_entire_n1) / tauxfreq_entire_n1 * 100) %>% round(digits = 2)
+
+tauxfreq_private_n1 <- sum(private$nb_nuitees) * 100 / (sum(private$nb_dispo) + sum(private$nb_nuitees))
+tauxfreq_private_n2 <- sum(private2$nb_nuitees) * 100 / (sum(private2$nb_dispo) + sum(private2$nb_nuitees))
+evol_private <- ((tauxfreq_private_n2 - tauxfreq_private_n1) / tauxfreq_private_n1 * 100) %>% round(digits = 2)
+```
+<br/>
+L'arrêt de l'activité du marché Airbnb à `r commune` s'observe tout d'abord au niveau du nombre de locations réservées : entre `r periode` et `r periode2`, elles ont subi une chute de `r -(((nrow(annee2_reserves) - nrow(annee_reserves)) / nrow(annee_reserves)) * 100) %>% round(digits = 0)`%, passant de `r nrow(annee_reserves)` à `r nrow(annee2_reserves)` unités.
+Les courbes ci-dessus montrent un déclin du nombre de nuitées réservées à partir de mars 2020, lors de la période de restriction des déplacements. En effet, on observe une chute moyenne de `r -(mean(test$baisse)) %>% round(digits = 0)`% du taux de fréquentation par logement de `r periode` à `r periode2` Seul `r (nrow(test %>% filter(negatif < 0)) * 100 / nrow(test)) %>% round(digits = 1)`% des logements ont connu une hausse du nombre de leur visites entre `r periode` et `r periode2`
+Enfin, l'arrêt du tourisme se ressent au niveau des revenus : ils sont passés de près de `r (sum(annee_reserves$rev_tot)) %>% round(digits = -5)`\$  en `r periode` à `r (sum(annee2_reserves$rev_tot)) %>% round(digits = -5)`\$ en `r periode2`. 
+
+
+### activité
+
+
+```{r}
+# Les logements entiers engendraient `r (sum(entire$rev_tot) * 100 /sum(annee_reserves$rev_tot)) %>% round(digits = 0)`% des revenus totaux de la commune en `r periode`, contre `r (sum(entire2$rev_tot) * 100 /sum(annee2_reserves$rev_tot)) %>% round(digits = 0)`% en `r periode2`. On observe un léger fléchissement de la tendance, malgré une baisse similaire de l'effectif de ces logements (respectivement `r ((nrow(entire2) - nrow(entire))* 100 / nrow(entire)) %>% round(digits = 2)` et `r ((nrow(private2) - nrow(private))* 100 / nrow(private)) %>% round(digits = 2)`%) . De plus, la baisse de fréquentation entre `r periode` et `r periode2` est moins marquée chez les chambres privées (`r evol_private`%) que parmi les logements entiers (`r evol_entire`%). Les chambres privées sont-elles les grandes gagnantes d'un marché déstructuré ?
+
+reserves_n0 <- annee_reserves %>% select(id_logement, nb_nuitees, nb_dispo)
+reserves_n0 <- reserves_n0 %>% rename("nb_nuitees_n0" = "nb_nuitees", "nb_dispo_n0" = "nb_dispo")
+reserves_n1 <- annee2_reserves %>% select(id_logement, nb_nuitees, nb_dispo)
+reserves_n1 <- reserves_n1 %>% rename("nb_nuitees_n1" = "nb_nuitees", "nb_dispo_n1" = "nb_dispo")
+
+fracas <- left_join(reserves_n0, reserves_n1, by = "id_logement", all.x = TRUE)
+join <- individuel_clean_sf %>% select(id_logement, id_carre)
+fracas <- left_join(join, fracas, by = "id_logement")
+fracas <- na.omit(fracas) # 293 logements sont réservés à la fois en 2019 et en 2020
+
+tab <- as.data.frame(table(fracas$id_carre))
+tab <- tab %>% rename("id_carre" = "Var1", "nb_log" = "Freq")
+
+fracas <- fracas %>% group_by(id_carre) %>%
+  summarise(nb_nuitees_n0 = sum(nb_nuitees_n0), nb_dispo_n0 = sum(nb_dispo_n0), nb_nuitees_n1 = sum(nb_nuitees_n1), nb_dispo_n1 = sum(nb_dispo_n1)) %>%
+  mutate(tauxfreq_n0 = (nb_nuitees_n0 * 100 / (nb_nuitees_n0 + nb_dispo_n0)), tauxfreq_n1 = (nb_nuitees_n1 * 100 / (nb_nuitees_n1 + nb_dispo_n1))) %>%
+  select(id_carre, tauxfreq_n0, tauxfreq_n1) %>%
+  mutate(evol = (((tauxfreq_n1 - tauxfreq_n0) / tauxfreq_n0) * 100)) %>%
+  select(id_carre, evol) %>%
+  filter(evol < 999999) # pour enlever les Inf
+
+fracas <- merge(fracas, tab, by = "id_carre")
+```
+
+
+```{r}
+# On crée la colonne jours_tot correspondant au nb de jours totaux durant lesquels le logement est en capacité d'être réservé
+mois_actifs <- mensuel_clean %>% filter(nb_dispo > 0 | nb_nuitees > 0)
+mois_actifs$jours_tot <- mois_actifs$nb_dispo + mois_actifs$nb_nuitees
+
+# puis on group_by les mois réservés en additionnant les jours réservés et le nombre de jours totaux
+months <- mois_actifs %>%
+  group_by(mois) %>%
+  summarise(nb_dispo = sum(jours_tot), nb_resa = sum(nb_nuitees))
+
+months <- months %>% mutate("Nombre de nuitées disponibles" = nb_dispo - nb_resa)
+months <- months %>% rename("Nombre de nuitées réservées" = nb_resa)
+empil <- months %>% 
+  gather("Nombre de nuitées disponibles", "Nombre de nuitées réservées", key = etat, value = count) %>% 
+  mutate(month = format(mois, format = "%Y-%m")) %>%
+  select(-mois, nb_dispo)
+
+p <- ggplot(data = empil, aes(x = month, y = count)) +
+  geom_col(stat = 'identity', aes(fill = etat, width = 0.7)) +
+  labs(title = "Réservations vs disponibilité",
+       x = "Date",
+       y = "Nombre de nutiées par mois",
+       fill = "",
+       caption = paste0("source : airdna.co, ", commune, ", novembre 2020")) +
+  scale_colour_manual(name = "Légende", labels = c("Nombre de nuitées disponibles", "Nombre de nuitées réservées"), values = c("nb_dispo", "count")) +
+  theme(legend.position = c(0.8,0.95),
+        legend.background = element_rect(fill = NA)) +
+  scale_x_discrete(breaks = c("2015-08", "2016-08", "2017-08", "2018-08", "2019-08", "2020-08"))
+p
+```
+
+ <br/> <br/> <div style= "float:left;position: relative; top: -10px;">
+```{r fig.height = 4, fig.width = 5.5, align = "left"}
+mois_reserves <- mensuel_clean %>% filter(nb_nuitees > 0)
+  
+bilan2015 <- mois_reserves %>%
+  filter(year == 2015) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2015 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2015)
+  
+bilan2016 <- mois_reserves %>%
+  filter(year == 2016) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2016 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2016)
+
+bilan2017 <- mois_reserves %>%
+  filter(year == 2017) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2017 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2017)
+
+bilan2018 <- mois_reserves %>%
+  filter(year == 2018) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2018 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2018)
+
+bilan2019 <- mois_reserves %>%
+  filter(year == 2019) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2019 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2019)
+
+bilan2020 <- mois_reserves %>%
+  filter(year == 2020) %>%
+  group_by(month) %>%
+  summarise(resa = sum(nb_nuitees),
+            dispo = sum(nb_dispo) + sum(nb_nuitees)) %>%
+  group_by(month) %>%
+  summarise(resa = sum(resa),
+            dispo = sum(dispo)) %>%
+  mutate(tauxfreq2020 = resa / (resa + dispo)*100) %>%
+  select(month, tauxfreq2020)
+
+# merge en 1 seul tableau pour préparer le graphique
+plotfreq <- merge(bilan2015, bilan2016, by = "month", all = TRUE)
+plotfreq <- merge(plotfreq, bilan2017, by = "month", all = TRUE)
+plotfreq <- merge(plotfreq, bilan2018, by = "month", all = TRUE)
+plotfreq <- merge(plotfreq, bilan2019, by = "month", all = TRUE)
+plotfreq <- merge(plotfreq, bilan2020, by = "month", all = TRUE)
+
+
+saison <- ggplot(data = plotfreq,
+                 aes(x = month, group = 1)) +
+  geom_line(stat = "identity", aes(y = tauxfreq2015, colour = "tauxfreq2015")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2016, colour = "tauxfreq2016")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2017, colour = "tauxfreq2017")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2018, colour = "tauxfreq2018")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2019, colour = "tauxfreq2019")) +
+  geom_line(stat = "identity", aes(y = tauxfreq2020, colour = "tauxfreq2020")) +
+  # scale_fill_brewer(palette = "PuBu") +
+  scale_colour_manual(name = "Année", labels = c("2015", "2016", "2017", "2018", "2019", "2020"), values = c("tauxfreq2015" = "grey69", "tauxfreq2016" = "dodgerblue1", "tauxfreq2017" = "dodgerblue2", "tauxfreq2018" = "dodgerblue3", "tauxfreq2019" = "dodgerblue4", "tauxfreq2020" = "red2")) +
+  xlab("Mois") +
+  scale_y_continuous("Taux de fréquentation (%)") +
+  labs(title = "Saisonnalité des logements Airbnb",
+       subtitle = "Parmi les logements réservés",
+       caption = "source : airdna.co, novembre 2020")+
+  theme_bw()
+# méthode : pour chaque mois calculer le taux de fréquentation en divisant la somme des nuitées
+# réservées par la somme des nuitées disponibles pour les logements actifs
+saison
+```
+
+</div><br/><br/>
+Les mois de juin et de septembre correspondent aux taux de fréquentation les plus élevés, tandis qu'août et novembre correspondent à des saisons creuses en raison du plus fort nombre de nuitées disponibles à ces périodes-là. Le comportement de l'année 2020 est complètement différent des autres années.
+<br/><br/><br/><br/><br/>
+
+## Analyse infra-communale
+
+```{r}
+# fonction pour compter le nombre de points par carré
+CountPt <- function(x, pt){
+  # Intersection avec l'objet sf de référence
+  inter <- st_intersects(x, pt)
+  # Nombre de points par objet géographique
+  v <- sapply(X = inter, FUN = length)
+  return(v)
+}
+
+annee_reserves_sf <- annee_sf %>% filter(nb_nuitees > 0)
+grillecom$count <- CountPt(grillecom, annee_reserves_sf)
+```
+
+```{r, results = 'hide'}
+# densité de points (nb logement / ha)
+grillecom$densite <- grillecom$count / grillecom$surface
+grillecom$densite <- grillecom$densite %>% round(digits = 1)
+```
+
+
+```{r}
+# pour compter la moyenne du prix par carré
+prixmedcarre <- annee_reserves_sf %>%
+  group_by(id_carre) %>%
+  summarise(prixmed = median(prixpers), nb_logement = n())
+
+# préparer la jointure
+grillecom <- tibble::rownames_to_column(grillecom, "id_carre") # enlever/ajouter un # si ça ne marche pas
+grillecom$id_carre <- as.numeric(grillecom$id_carre)
+
+# jointure
+test <- st_join(grillecom, prixmedcarre)
+test$prixmed <- test$prixmed %>% round(digits = 2)
+```
+
+
+
+```{r}
+test <- test %>% filter(surface > 0.3) # car valeurs trop élevées si 1 logement sur une petite partie d'un carreau
+
+bins <- getBreaks(v = test$prixmed, nclass = 6, method = "fisher-jenks")
+pal <- colorBin("YlOrRd", domain = test$prixmed, bins = bins)
+labels <- sprintf(
+  "<strong>%s logements réservés</strong><br/> Prix médian : %g $ / personne",
+  test$nb_logement, test$prixmed
+) %>% lapply(htmltools::HTML)
+
+bins2 <- getBreaks(v = test$densite, nclass = 6, method = "fisher-jenks")
+pal2 <- colorBin("Blues", domain = test$densite, bin = bins2)
+labels2 <- sprintf(
+  "Densité : %s logement / hectare",
+  test$densite
+) %>% lapply(htmltools::HTML)
+
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = test,
+              group = "Densité (logements/ha)", 
+              fillColor = ~pal2(densite),
+              weight = 2,
+              opacity = 1,
+              color = "white",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 5,
+                color = "666",
+                dashArray = "",
+                fillOpacity = 0.7,
+                bringToFront = TRUE),
+              label = labels2,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal", padding = "3px 8px"),
+                textsize = "15px",
+                direction = "auto"))  %>% 
+  addLegend(pal = pal2, group = "Densité (logements/ha)", values = test$densite, opacity = 0.7, title = "Nombre de logements \npar hectare", position = "bottomright") %>%
+  addPolygons(data = test,
+              group = "Prix médian ($)", 
+              fillColor = ~pal(prixmed),
+              weight = 2,
+              opacity = 1,
+              color = "white",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(
+                weight = 5,
+                color = "666",
+                dashArray = "",
+                fillOpacity = 0.7,
+                bringToFront = TRUE),
+              label = labels,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal", padding = "3px 8px"),
+                textsize = "15px",
+                direction = "auto")) %>%
+  addLegend(pal = pal, group = "Prix médian ($)", values = test$prixmed, opacity = 0.7, title = "Prix médian \nau carroyage", position = "bottomright") %>%
+  addLayersControl(
+    #baseGroups = c("Densité (logements/ha)", "Prix médian ($)"),
+    overlayGroups = c("Densité (logements/ha)", "Prix médian ($)"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+```
+
+
+<br/>
+
+```{r}
+# taux de fréquentation moyen par iris
+avgfreqiris <- annee_reserves_sf %>%
+  group_by(id_iris) %>%
+  summarise(nb_nuitees_tot = sum(nb_nuitees), nb_logement = n(), nb_dispo_tot = sum(nb_dispo) + sum(nb_nuitees))
+
+avgfreqiris$tauxfreq <- avgfreqiris$nb_nuitees_tot * 100 / (avgfreqiris$nb_nuitees_tot + avgfreqiris$nb_dispo_tot)
+
+# jointure
+iris <- tibble::rownames_to_column(iris, "id_iris") # pour joindre via cette colonne
+iris$id_iris <- as.numeric(iris$id_iris)
+
+test <- st_join(iris, avgfreqiris)
+
+iris <- st_transform(iris, crs = 2154)
+test <- st_transform(test, crs = 2154)
+
+# carte choropolèthe
+plot(
+  st_geometry(iris),
+  col = "white",
+  border = "black",
+  bg = "white"
+)
+propSymbolsChoroLayer(
+  x = test,
+  var = "nb_nuitees_tot",
+  border = "grey50",
+  lwd = 1,
+  legend.var.pos = "topleft",
+  legend.var.title.txt = "Nombre total de nuitées réservées",
+  var2 = "tauxfreq",
+  method = "fisher-jenks",
+  nclass = 5,
+  col = carto.pal(pal1 = "orange.pal", n1 = 5),
+  legend.var2.values.rnd = 2,
+  legend.var2.pos = "bottomright",
+  legend.var2.title.txt = "Taux de \nfréquentation (%)"
+)
+layoutLayer(
+  title = paste0("Taux de fréquentation moyen des logements Airbnb à ", commune, ", ", periode), 
+  sources = "source : Airdna, décembre 2020", 
+  author = "Laurian, 2021"
+)
+```
+
+
+[^1]: Source : Nombre de Logements (totaux) des communes d'Île-de-France (Donnée INSEE), 2017. https://data-iau-idf.opendata.arcgis.com/datasets/nombre-de-logements-totaux-des-communes-dîle-de-france-donnée-insee/explore
+[^2]: Source : capacité des communes en hébergements touristiques, INSEE base 2019 https://www.insee.fr/fr/statistiques/2021703
+
+
