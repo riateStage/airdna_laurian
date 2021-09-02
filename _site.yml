@@ -16,7 +16,7 @@ navbar:
     - icon: fa-github
       href: https://github.com/riateStage/airdna_laurian
 output_dir: "docs"
-exclude: ["data", "meta", "old", ".Rhistory", "Memoire"]
+exclude: ["data", "old", ".Rhistory"]
 
 output:
   html_document:

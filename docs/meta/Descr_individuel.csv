@@ -1,0 +1,71 @@
+Variable;Type;Description
+Zipcode;logical;Code postal de la ville du logement
+Neighborhood;logical;Quartier où se situe le logement
+Metropolitan Statistical Area;logical;Aire statistique métropolitaine dans laquelle se trouve le logement (seulement aux USA)
+HomeAway Location Type;logical;Type de logement HomeAway
+Airbnb Property Plus;logical;TRUE : le logement est considéré par Airbnb comme étant « exceptionnel » et vérifié par un contrôle qualité
+Airbnb Home Collection;logical;TRUE : le logement fait partie d’un ensemble de logements sélectionnés par Airbnb pour un type spécifique de voyage
+HomeAway Property Manager ID;logical;Identifiant unique de chaque hôte Homeaway
+HomeAway Premier Partner;logical;TRUE si l’hôte est Premier Partner chez HomeAway
+Integrated Property Manager;logical;TRUE : l’hôte vit dans le logement qu’il loue
+License;character;Numéro de licence de l’hôte
+HomeAway Property ID;logical;Identifiant unique de chaque propriété Homeaway
+Extra People Fee (Native);numeric;Frais pour un voyageur supplémentaire dans la devise choisie par l’hôte
+Extra People Fee (USD);numeric;Frais pour un voyageur supplémentaire en dollars
+Average Daily Rate (Native);numeric;Revenus engendré par l’hôte pour une réservation, dans la devise choisie par l’hôte sur l’année passée : Revenus totaux / Nombre de nuitées réservées
+Average Daily Rate (USD);numeric;Revenus engendré par l’hôte pour une réservation, en dollars sur l’année passée : Revenus totaux / Nombre de nuitées réservées
+Occupancy Rate LTM;numeric;Taux de fréquentation : Nombre de jours réservés / (nombre de nuitées réservés + nombre de nuitées disponibles) Les calculs ne prennent pas en compte les jours bloqués et les mois sans réservation
+Count Reservation Days LTM;numeric;Nombre de jours classés comme réservés durant les 12 derniers mois
+Count Available Days LTM;numeric;Nombre de jours classés comme disponibles, c’est à dire proposés à la location mais non réservé durant les 12 derniers mois
+Count Blocked Days LTM;numeric;Nombre de jours classés comme bloqués durant les 12 derniers mois
+Security Deposit (Native);numeric;Caution choisie par l'hôte dans sa devise
+Security Deposit (USD);numeric;Caution choisie par l’hôte en dollars
+Cleaning Fee (Native);numeric;Frais de ménage par réservation dans la devise choisie par l’hôte
+Cleaning Fee (USD);numeric;Frais de ménage par réservation en dollars
+Airbnb Response Time (Text);character;Temps de réponse de l’hôte
+Airbnb Value Rating;numeric;Note sur 10 attribuée par le visiteur au rapport qualité/prix
+Airbnb Communication Rating;numeric;Note sur 10 attribuée par le visiteur à la communication de l’hôte
+Airbnb Accuracy Rating;numeric;Note sur 10 attribuée par le visiteur à l’exactitude de l’annonce
+Airbnb Cleanliness Rating;numeric;Note sur 10 attribuée par le visiteur à la propreté du logement
+Airbnb Checkin Rating;numeric;Note sur 10 attribuée par le visiteur à l’accueil de l’hôte
+Airbnb Location Rating;numeric;Note sur 10 attribuée par le visiteur à la localisation du logement
+Overall Rating;numeric;Note du visiteur sur une échelle de 0 à 100
+Published Monthly Rate (USD);numeric;Prix mensuel choisi par l’hôte
+Published Weekly Rate (USD);numeric;Prix hebdomadaire choisi par l’hôte
+Check-in-Time;character;Heure du check-in
+Checkout Time;character;Heure du checkout
+Response Rate;numeric;Pourcentage de réponse de l’hôte dans les 24h
+Calendar Last Updated;Date;Dernier jour durant lequel l’hôte a mis à jour son calendrier
+Listing Images;character;Photos de l’annonce
+Currency Native;character;Devise choisie par l’hôte
+Airbnb Superhost;logical;TRUE si l’hôte est Superhost
+Published Nightly Rate (USD);numeric;Prix choisi par l’hôte pour une nuitée
+Created Date;Date;Date durant laquelle a été mis en ligne le logement
+Annual Revenue LTM (Native);numeric;Revenus totaux engendrés par l’hôte sur l’année passée, dans la devise choisie par l’hôte
+Pets Allowed;logical;TRUE : les animaux sont autorisés au sein du logement
+Airbnb Property ID;numeric;Identifiant unique de chaque propriété Airbnb
+Airbnb Host ID;numeric;Identifiant unique de chaque hôte Airbnb
+Cancellation Policy;character;Mesures d’annulation
+Minimum Stay;numeric;Durée minimale du séjour
+Number of Photos;numeric;Nombre de photos présentes sur l’annonce
+Amenities;character;Aménités présentes au sein du logement
+Property ID;character;Identifiant unique de chaque propriété 
+Listing Title;character;Titre de l’annonce
+Property Type;character;Type de logement (choisi par l’hôte)
+Listing Type;character;Type de logement (selon modalités Airbnb)
+Last Scraped Date;Date;Dernier jour où le logement a été scrapé. Chaque logement est scrapé tous les 3 jours
+Country;character;Pays dans lequel se situe le logement
+State;character;Région dans laquelle se situe le logement
+City;character;Ville dans laquelle se situe le logement
+Annual Revenue LTM (USD);numeric;Revenus totaux engendrés par l’hôte sur l’année passée, en dollars
+Number of Bookings LTM;numeric;Nombre de réservations lors des 12 derniers mois
+Number of Reviews;numeric;Nombre total de commentaires sur l’annonce 
+Bedrooms;numeric;Nombre de chambres
+Bathrooms;numeric;Nombre de salles de bain
+Max Guests;numeric;Capacité d’accueil en nombre de voyageurs
+Instantbook Enabled;logical;TRUE : l’annonce peut être réservée sans devoir communiquer avec l’hôte
+Listing URL;character;Lien URL vers l’annonce
+Listing Main Image URL;character;Lien URL vers la photo principale de l’annonce
+Latitude;numeric;Latitude du logement
+Longitude;numeric;Longitude du logement
+Exact Location;logical;TRUE : l’annonce est à l’endroit précis où elle est localisée

@@ -160,11 +160,27 @@ Un geopackage par commune qui contient les couches géographiques suivantes :
 - IRIS intersectant l'espace d'étude (Polygones).
 - Stations de transports localisées dans la commune (Points).
 
-![](meta/issy.png)
+![](meta/issy.PNG)
 
 # Session Info 
 
 Packages R mobilisés pour préparer les données et construire les analyses. 
+
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE}
+library(readr) # Import de fichiers csv
+library(readxl)
+library(dplyr) # Manipulation de dataframes
+library(tidyr) # pareil
+library(ggplot2) # Production de graphiques
+library(sf) # Opérations de géotraitement
+library(leaflet) # Cartographie interactive
+library(RColorBrewer) # Palettes de couleurs
+library(cartography) # Cartographie thématique
+library(kableExtra) # Faire des beau tableaux
+```
+
+
 
 ```{r}
 sessionInfo()

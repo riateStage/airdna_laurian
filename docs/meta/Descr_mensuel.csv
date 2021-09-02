@@ -1,0 +1,30 @@
+Variable;Type;Description
+Zipcode;logical;Code postal de la ville du logement
+Neighborhood;logical;Quartier où se situe le logement
+Metropolitan Statistical Area;logical;Aire statistique métropolitaine dans laquelle se trouve le logement (seulement aux USA)
+HomeAway Property ID;logical;Identifiant unique de chaque propriété Homeaway
+HomeAway Property Manager;logical;Identifiant unique de chaque hôte Homeaway
+ADR (Native);numeric;Revenus engendré par l’hôte pour une réservation, dans la devise choisie par l’hôte : Revenus totaux / Nombre de nuitées réservées
+ADR (USD);numeric;Revenus engendré par l’hôte pour une réservation, en dollars : Revenus totaux / Nombre de nuitées réservées
+Revenue (USD);numeric;Revenus totaux engendrés pendant la période de récolte en dollars
+Occupancy Rate;numeric;Taux de fréquentation : Nombre de jours réservés / (nombre de nuitées réservés + nombre de nuitées disponibles) pendant le mois
+Revenue (Native);numeric;Revenus totaux engendrés pendant la période de récolte dans la devise choisie par l’hôte
+Currency Native;character;Devise choisie par l’hôte
+Airbnb Property ID;numeric;Identifiant unique de chaque propriété Airbnb
+Airbnb Host ID;numeric;Identifiant unique de chaque hôte Airbnb
+Property ID;character;Identifiant unique de chaque propriété 
+Property Type;character;Type de logement (choisi par l’hôte)
+Listing Type;character;Type de logement (selon modalités Airbnb)
+Bedrooms;numeric;Nombre de chambres
+Reporting Month;Date;Mois pendant lequel les données ont été récoltées
+Number of Reservations;numeric;Nombre de réservations durant le mois
+Reservation Days;numeric;Nombre de nuitées réservées durant le mois
+Available Days;numeric;Nombre de jours classifiés comme disponibles, mais non réservés 
+Blocked Days;numeric;Nombre de jours classifiés comme bloqués à la réservation.
+Country;character;Pays dans lequel se situe le logement
+State;character;Région dans laquelle se situe le logement
+City;character;Ville dans laquelle se situe le logement
+Latitude;numeric;Latitude du logement
+Longitude;numeric;Longitude du logement
+Active;logical;TRUE si le logement a été proposé ou réservé au moins un jour durant la période de récolte
+Scraped During Month;logical;TRUE si le logement a été scrapé pendant le mois
