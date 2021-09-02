@@ -9,6 +9,7 @@ editor_options:
 ---
 
 
+<br>
 
 # Informations générales
 
@@ -20,16 +21,22 @@ Les scripts ici proposés reposent sur des extractions réalisées à la commune
 
 L'extraction porte sur les limites communales de Bagneux, Issy-les-Moulineaux et Pantin. 
 
+<br>
+
 
 ## Date de création des jeux de données consolidées
 
 Juillet 2021 (dernière version)
 
 
+<br>
+
 ## Date des métadonnées
 
 Septembre 2021.
 
+
+<br>
 
 ## Points de contact
 
@@ -38,27 +45,40 @@ Septembre 2021.
 - Organisation : UMS RIATE, Université de Paris
 - email : laurian.louis@gmail.com
 
+<br>
+
 - Nom : Ronan Ysebaert
 - Role : Custodian
 - Organisation : UMS RIATE, Université de Paris
 - email : ronan.ysebaert@cnrs.fr
+
+<br>
 
 - Nom : Marianne Guérois
 - Role : Custodian
 - Organisation : UMS RIATE, Université de Paris
 - email : marianne.guerois@u-paris.fr
 
+<br>
+
 - Nom : Malika Madelin
 - Role : Custodian
 - Organisation : UMR PRODIG, Université de Paris
- email : malika.madelin@u-paris.fr
+- email : malika.madelin@u-paris.fr
+
+<br>
+
 
 ## Citer ce travail
 
-"Laurian, Louis, 2021, xxxx, UMS RIATE, ANR WIsDHoM, stage de master". 
+"Laurian Louis, 2021, Mise en oeuvre d’une chaîne de traitement de données AirDNA : Étudier l’activité de la plateforme Airbnb dans 3 communes franciliennes, UMS RIATE, ANR WIsDHoM, mémoire de stage de master Géoprisme". 
+
+<br><br>
 
 
-# Descriptif des variables
+# Description des données mobilisées
+
+Ce travail porte sur l'emprise géographique de trois communes franciliennes : Bagneux, Issy-les-Moulineaux et Pantin. 
 
 ## Données brutes
 
@@ -91,31 +111,56 @@ La base de données **individuelle** est plus détaillée et est individuelle à
 kable(Descr_individuel) %>% kable_paper()
 ```
 
+<br>
 
 
 
 ### INSEE
 
+- [Hôtels](https://www.insee.fr/fr/statistiques/4489915)
+- [Grille de 200 mètres](https://www.insee.fr/fr/statistiques/4176290?sommaire=4176305)
 
-### IGN
+<br>
+
+### Plateforme Data Ile-de-France
+
+- [Stations de transport en Ile-de-France](https://data.iledefrance.fr/explore/dataset/gares-et-stations-du-reseau-ferre-dile-de-france-donnee-generalisee/information/ <https://data.iledefrance.fr/explore/dataset/gares-et-stations-du-reseau-ferre-dile-de-france-donnee-generalisee/information/) du réseau Ile-de-France 
+- [Contours IRIS](https://data.iledefrance.fr/explore/dataset/iris/information/ <https://data.iledefrance.fr/explore/dataset/iris/information/>). 
+- [Nombre de logements par commune](https://data.iledefrance.fr/explore/dataset/nombre-de-logements-totaux-des-communes-dile-de-france-donnee-insee/information/)
+
+
+<br>
 
 
 ## Données consolidées
 
-Données consolidées issues de la partie de préparation des données. 
+La phase de préparation et nettoyage des données mobilises les données brutes et restitue des données consolidées, utilisées dans les analyses. 
+
 
 ### AirDNA
 
-Indicateurs utiles pour rejouer les analyses (synthèse et comparaisons de communes à communes).
+Indicateurs utiles pour rejouer les analyses (synthèse et comparaisons de communes à communes). Un fichier par commune. 
 
 ```{r, echo = FALSE}
 newvar <- read_xls("meta/newvar.xls")
 kable(newvar) %>% kable_paper()
 ```
 
+<br>
 
 ### Couches géographiques
 
+Un geopackage par commune qui contient les couches géographiques suivantes :
+
+- Espace d'étude : Limites géographiques de la commune (Polygone).
+- Données consolidées mensuelles, géoréférencées (Points).
+- Données consolidées individuelles, géoréférencées (Points).
+- Carreaux de grille de 200 mètres intersectant l'espace d'étude (Polygones).
+- Hôtels localisés dans la commune (Points).
+- IRIS intersectant l'espace d'étude (Polygones).
+- Stations de transports localisées dans la commune (Points).
+
+![](meta/issy.png)
 
 # Session Info 
 

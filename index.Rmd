@@ -1,7 +1,7 @@
 ---
-title: "Harmonisation et traitement de la base de données AirDNA" 
-subtitle: "Contribution à une analyse reproductible"
-author: Louis Laurian, Master Géoprisme, Université de Paris
+title: "Mise en oeuvre d’une chaîne de traitement de données AirDNA"  
+subtitle: "Étudier l’activité de la plateforme Airbnb dans 3 communes franciliennes"
+author: Louis Laurian, M2 GAED - Géographie, aménagement environnement et développement, parcours Géoprisme, Université de Paris
 date: <small>`r format(Sys.time(), '%d %B %Y')`</small>
 ---
 
@@ -11,6 +11,12 @@ date: <small>`r format(Sys.time(), '%d %B %Y')`</small>
 
 # Encadrement
 
-Encadrement réalisé par Marianne Guérois, Malika Madelin et Ronan Ysebaert
+Encadrement réalisé par Marianne Guérois, Malika Madelin et Ronan Ysebaert entre le 15/02/2021 et le 30/07/2021. 
+
 
 # Mémoire associé
+
+[Accès](Memoire/memoire_laurian.pdf) au mémoire qui fait suite à la réalisation de ce site Web. 
+
+
+# Présentation de soutenance
