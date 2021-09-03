@@ -8,7 +8,9 @@ editor_options:
   chunk_output_type: console
 ---
 
-Cette page propose une comparaison de communes prises deux à deux. Cette comparaison porte sur Issy-les-Moulineaux, Pantin et Bagneux. 
+Cette partie permet de mettre en vis-à-vis les performances d’Airbnb entre deux communes. La superposition d’indicateurs et de courbes permet de mieux détecter les similitudes ou bien les différences entre plusieurs marchés. Les indicateurs utilisés sont pour la plupart les mêmes que pour la partie précédente, avec une analyse plus approfondie de la période correspondant à la reprise de l’activité post-Covid. L’hypothèse est la suivante : l’activité d’Airbnb dépend des contextes locaux des communes. Ainsi, Issy-les-Moulineaux et Pantin, bien que limitrophes, ne présentent pas les mêmes caractéristiques en terme de fréquentation touristique. En effet, Issy-les-Moulineaux est l’une des premières communes où les restrictions en terme de nombre de nuitées réservées sont apparues, tandis que Pantin a fait depuis plusieurs décennies l’objet de grandes opérations de rénovations urbaines, notamment en ce qui concerne l’immobilier.
+
+Le code R qui a permis de générer les représentations graphiques et tableaux est affiché pour la première comparaison communale. Il est exactement identique pour les deux autres commparaisons, à l'exception de l'import des données.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message = FALSE)
@@ -17,13 +19,9 @@ knitr::opts_chunk$set(eval = TRUE)
 knitr::opts_chunk$set(warning = FALSE)
 ```
 
-```{r, echo = FALSE}
+```{r, echo = TRUE}
 library(knitr) # Générer des rapports automatisés
 library(rmdformats) # Format du document markdown
-```
-
-
-```{r, echo = FALSE}
 library(readr) # Import de fichiers csv
 library(dplyr) # Manipulation de dataframes
 library(tidyr) # pareil
@@ -33,9 +31,11 @@ library(RColorBrewer) # Palettes de couleurs
 library(kableExtra) # Faire des beau tableaux
 ```
 
+<br>
+
 # Pantin - Issy
 
-```{r}
+```{r, echo = TRUE}
 # seuls les paramètres de ce chunk sont à changer
 periode <- 2019
 periode2 <- 2020
@@ -58,7 +58,7 @@ com2_log <- read_csv("data/insee/log_Issy.csv")
 ```
 
 
-```{r}
+```{r, echo = TRUE}
 # On ajoute le nom de la ville et on stocke les tableaux de départ dans des dataframes ref
 com1$ville <- com1_nom
 com1_mensuel$ville <- com1_nom
@@ -71,7 +71,7 @@ com2_mensuel_ref <- com2_mensuel
 ```
 
 
-```{r}
+```{r, echo = TRUE}
 # On ne sélectionne que l'année 2019
 com1_mensuel <- com1_mensuel %>% filter(year == periode)
 com1 <- com1_mensuel %>% select(-mois, -`Occupancy Rate`, -Active, -year, -month, -day,
@@ -145,7 +145,7 @@ rm(join)
 ```
 
 
-```{r}
+```{r, echo = TRUE}
 com1_actifs <- com1 %>% filter(nb_dispo > 0 | nb_nuitees > 0)
 com1_reserves <- com1 %>% filter(nb_nuitees > 0 & nb_resa > 0)
 
@@ -153,7 +153,7 @@ com2_actifs <- com2 %>% filter(nb_dispo > 0 | nb_nuitees > 0)
 com2_reserves <- com2 %>% filter(nb_nuitees > 0 & nb_resa > 0)
 ```
 
-```{r}
+```{r, echo = TRUE}
 # petites phrases pour les comparaisons
 comparhotel <- " "
 if(nrow(com1) > com1_hotel[1,12] & nrow(com2) > com2_hotel[1,12]){
@@ -164,9 +164,9 @@ if(nrow(com1) > com1_hotel[1,12] & nrow(com2) > com2_hotel[1,12]){
 ```
 
 
-Ce document a pour objectif de comparer les performances et l'activité des logements Airbnb entre deux communes données, ici `r com1_nom` et `r com2_nom`. Ces deux communes concentrent respectivement `r nrow(com1)` et `r nrow(com2)` logements Airbnb en `r periode`, pour `r com1_hotel[1,12]` et `r com2_hotel[1,12]` chambres d'hôtel. `r comparhotel` Les logements Airbnb représentent respectivement `r (nrow(com1) * 100 / com1_log[1,21]) %>% round(digits = 1)` et `r (nrow(com2) * 100 / com2_log[1,21]) %>% round(digits = 1)`% de la totalité des logements des communes de `r com1_nom` et `r com2_nom`.
+Cette section a pour objectif de comparer les performances et l'activité des logements Airbnb entre deux communes données, ici `r com1_nom` et `r com2_nom`. Ces deux communes concentrent respectivement `r nrow(com1)` et `r nrow(com2)` logements Airbnb en `r periode`, pour `r com1_hotel[1,12]` et `r com2_hotel[1,12]` chambres d'hôtel. `r comparhotel` Les logements Airbnb représentent respectivement `r (nrow(com1) * 100 / com1_log[1,21]) %>% round(digits = 1)` et `r (nrow(com2) * 100 / com2_log[1,21]) %>% round(digits = 1)`% de la totalité des logements des communes de `r com1_nom` et `r com2_nom`.
 
-```{r}
+```{r, echo = TRUE}
 # tableaux
 nblog <- data.frame(matrix(ncol = 7, nrow = 3))
 colnames(nblog) <- c(paste("Indicateur (", periode ,")"), com1_nom, com2_nom, com1_nom, com2_nom, com1_nom, com2_nom)
@@ -208,7 +208,7 @@ kable(nblog, align = "c", escape = F) %>%
 ```
 
 
-```{r}
+```{r, echo = TRUE}
 comparlog <- " "
 taux_com1 <- (nrow(com1_reserves) * 100 / nrow(com1_actifs)) %>% round(digits = 2)
 taux_com2 <- (nrow(com2_reserves) * 100 / nrow(com2_actifs)) %>% round(digits = 2)
@@ -244,7 +244,7 @@ if(pluscher / moinscher > 1.5){
 
 Le tableau suivant prend comme stock de référence les logements réservés. Le taux d'activité (nombre de logements réservés par rapport au nombre de logements actifs) est plus élevé dans la commune de `r comparlog`. On observe une `r comparprix`.
 
-```{r}
+```{r, echo = TRUE}
 # ajouter taux d'activité
 
 options(scipen = 3)
@@ -345,7 +345,7 @@ kable(indicateur, digits = 0, booktabs = TRUE) %>%
 ```
 
 
-```{r}
+```{r, echo = TRUE}
 sejours_com1 <- com1_reserves %>% select(nb_nuitees, duree, ville)
 sejours_com2 <- com2_reserves %>% select(nb_nuitees, duree, ville)
 sejours <- rbind(sejours_com1, sejours_com2)
@@ -391,7 +391,7 @@ plot_nuitees <- ggplot(data = sejours_nbnuitees, aes(x = ville)) +
 ```
 
 
-```{r}
+```{r, echo = TRUE}
 phrase_multi <- " "
 if(indicateur[10,6] > indicateur[10,4] & indicateur[10,7] > indicateur[10,5]){
   phrase_multi <- paste0("Les multiloueurs sont plus enclins à louer des chambres privées dans les deux communes : respectivement ", (indicateur[10,6]) %>% round(digits = 0), " et ", (indicateur[10,7]) %>% round(digits = 0), "%  d'entre elles sont louées par des multiloueurs")
@@ -430,13 +430,13 @@ if(ville_pluschere == ville_plusriche){
 
 La durée moyenne des séjours ainsi que le nombre total de nuitées réservées représentent des indicateurs intéressants de l'activité d'Airbnb dans une ville : on dénombre respectivement `r (indicateur[8,2]) %>% round(digits = 0)` et `r (indicateur[8,3]) %>% round(digits = 0)`% de séjours courts, c'est-à-dire inférieurs à une semaine, et environ un quart des logements ont engrangé plus de 120 nuitées réservées dans les deux communes. `r phrase_multi`. Enfin, `r phrase` : les logements Airbnb de la commune de `r ville_plusriche` ont engrangé un revenu médian de `r plusriche`\$ en `r periode`, contre `r moinsriche`\$ à `r ville_moinsriche`, soit des revenus supérieurs de l'ordre de `r ((plusriche - moinsriche) / moinsriche * 100) %>% round(digits = 0)`% à `r ville_plusriche`.
 
-```{r}
+```{r, echo = TRUE}
 library(gridExtra) # pour mettre 2 graphiques côte à côte
 grid.arrange(plot_duree, plot_nuitees, ncol = 2)
 ```
 
 
-```{r}
+```{r, echo = TRUE}
 breaks <- seq(0, max(com1_reserves$rev_tot), by = 1)
 
 test <- com1_reserves
@@ -487,7 +487,7 @@ dist2$cumul_log <- 100 -dist2$cumul_log
 ```
 
 
-```{r}
+```{r, echo = TRUE}
 courbe <- rbind(dist, dist2)
 plot1 <- ggplot(data = courbe, aes(x = cumul_log, y = cumulpct))+
   geom_line(aes(color = ville)) +
@@ -503,7 +503,7 @@ plot1 <- ggplot(data = courbe, aes(x = cumul_log, y = cumulpct))+
 ```
 
 
-```{r}
+```{r, echo = TRUE}
 breaks3 <- seq(0, max(com1_reserves$nb_nuitees), by = 1)
 
 test3 <- com1_reserves
@@ -554,7 +554,7 @@ dist4$cumulpct <- 100 -dist4$cumulpct
 dist4$cumul_log <- 100 -dist4$cumul_log
 ```
 
-```{r}
+```{r, echo = TRUE}
 courbe2 <- rbind(dist3, dist4)
 plot2 <- ggplot(data = courbe2, aes(x = cumul_log, y = cumulpct))+
   geom_line(aes(color = ville)) +
@@ -567,7 +567,7 @@ plot2 <- ggplot(data = courbe2, aes(x = cumul_log, y = cumulpct))+
   theme(legend.position = "none")
 ```
 
-```{r}
+```{r, echo = TRUE}
 # ref nb de logements / revenus pour l'interprétation
 ref_x <- dist %>% filter(abs(cumul_log-20) == min(abs(cumul_log-20)))
 ref_x <- ref_x[1,6]
@@ -620,11 +620,11 @@ if(val_y == val_y2 & val2_y == val2_y2 & ref_x == ref2_x){
 
 Lorsque l'on s'intéresse à la distribution des revenus ainsi que des nuitées réservées, on observe une poignée de logements qui concentrent la majeure partie de l'activité dans les deux communes. `r phrase3` `r phrase` `r phrase2`
 
-```{r}
+```{r, echo = TRUE}
 grid.arrange(plot1, plot2, ncol = 2)
 ```
 
-```{r}
+```{r, echo = TRUE}
 riches_com1 <- com1_reserves %>% group_by(id_hote) %>%
   summarise(revtot = (sum(rev_tot)) %>% round(digits = 0), id_hote = id_hote, Freq = Freq)
 
@@ -663,7 +663,7 @@ if (riches_com1[1,2] > 100000 & riches_com2[1,1] > 100000){
 
 
 <br/><br/><div style= "float:right;position: relative; top: -30px;">
-```{r fig.asp = 1, fig.width = 2, position = "float right"}
+```{r fig.asp = 1, fig.width = 2, position = "float right", echo = TRUE}
 riches <- cbind(head(riches_com1, 10), head(riches_com2, 10))
 
 knitr::kable(riches, caption = paste("Top hôtes", periode), align = 'r', table.attr = "style='width:20%;'") %>%
@@ -677,7 +677,7 @@ Si la majeure partie des nuitées et des revenus sont concentrés parmi un faibl
 Ces revenus très élevés sont dûes en partie à la détention de plusieurs logements. Dans la commune de `r com1_nom`, on trouve des multiloueurs propriétaires de `r max(com1_reserves$Freq)` logements. À `r com2_nom`, des propriétaires détiennent jusqu'à `r max(com2_reserves$Freq)` logements. Parmi les 5 hôtes les plus fortunés, on retrouve `r nrow(tophotes_com1 %>% filter(nblog == 1))` monoloueurs à `r com1_nom`, et `r nrow(tophotes_com2 %>% filter(nblog == 1))` à `r com2_nom`.
 
 
-```{r}
+```{r, echo = TRUE}
 com1_mensuel_reserves <- com1_mensuel_ref %>% filter(nb_nuitees > 0)
 nblogactifs_com1 <- com1_mensuel_reserves %>% group_by(mois) %>%
   summarise(count = n(), ville = ville) %>%
@@ -713,7 +713,7 @@ if(pic_com1[1,4] < pic_com2[1,4]){
 
 Lorsque l'on s'intéresse à l'évolution de l'activité du marché depuis que airdna analyse les données (`r min(com1_mensuel_reserves$year)` à `r com1_nom` et `r min(com2_mensuel_reserves$year)` à `r com2_nom`), on observe que le pic du nombre de nuitées réservées est atteint à `r com1_nom` en `r pic_com1[1,5]` `r pic_com1[1,4]` avec `r pic_com1[1,2]` logements réservés. À `r com2_nom`, le pic apparaît `r datepic` en `r pic_com2[1,5]` `r pic_com2[1,4]` avec `r pic_com2[1,2]` logements réservés au cours de ce mois.
 
-```{r}
+```{r, echo = TRUE}
 ggplot(data = nblogactifs, aes(x = mois, y = count, color = ville)) +
   expand_limits(y = c(0,550)) +
   geom_line() +
@@ -726,7 +726,7 @@ ggplot(data = nblogactifs, aes(x = mois, y = count, color = ville)) +
 
 
 
-```{r}
+```{r, echo = TRUE}
 freqcom1 <- com1_mensuel_reserves %>%
   group_by(mois) %>%
   summarise(resa = sum(nb_nuitees),
@@ -759,7 +759,7 @@ ggplot(data = plotfreq, aes(x = mois, y = tauxfreq, color = ville)) +
 
 
 
-```{r}
+```{r, echo = TRUE}
 # comparaison année de référence vs une autre année (en l'occurence 2020)
 # comme l'année 2020 n'est pas complète on prend les indicateurs au mois
 com1_mensuel_reserves <- com1_mensuel_ref %>% filter(nb_nuitees > 0 & year == periode)
@@ -814,7 +814,7 @@ if (evol[1,6] > 0 & evol[1,7] < 0){
 Enfin, lorsque l'on se concentre sur la période Covid, on observe sans surprise une baisse drastique de l'activité d'Airbnb dans la commune. Cette baisse s'observe notamment au niveau du comportement des visiteurs : on enregistre des baisses de l'ordre de `r evol[2,6]` et `r evol[2,7]` du nombre de nuitées réservées dans les deux communes. `r phraseevol`. Le revenu mensuel médian quant à lui a chuté de respectivement `r evol[4,6]` et `r evol[4,7]`.
 
 
-```{r}
+```{r, echo = TRUE}
 knitr::kable(evol, digits = 1) %>%
   add_header_above(header = c(" " = 1, setNames(2, periode), setNames(2, periode2),
                               setNames(2, "Evolution"))) %>%
@@ -956,7 +956,7 @@ if(nrow(com1) > com1_hotel[1,12] & nrow(com2) > com2_hotel[1,12]){
 ```
 
 
-Ce document a pour objectif de comparer les performances et l'activité des logements Airbnb entre deux communes données, ici `r com1_nom` et `r com2_nom`. Ces deux communes concentrent respectivement `r nrow(com1)` et `r nrow(com2)` logements Airbnb en `r periode`, pour `r com1_hotel[1,12]` et `r com2_hotel[1,12]` chambres d'hôtel. `r comparhotel` Les logements Airbnb représentent respectivement `r (nrow(com1) * 100 / com1_log[1,21]) %>% round(digits = 1)` et `r (nrow(com2) * 100 / com2_log[1,21]) %>% round(digits = 1)`% de la totalité des logements des communes de `r com1_nom` et `r com2_nom`.
+Pour `r com1_nom` et `r com2_nom`, ces deux communes concentrent respectivement `r nrow(com1)` et `r nrow(com2)` logements Airbnb en `r periode`, pour `r com1_hotel[1,12]` et `r com2_hotel[1,12]` chambres d'hôtel. `r comparhotel` Les logements Airbnb représentent respectivement `r (nrow(com1) * 100 / com1_log[1,21]) %>% round(digits = 1)` et `r (nrow(com2) * 100 / com2_log[1,21]) %>% round(digits = 1)`% de la totalité des logements des communes de `r com1_nom` et `r com2_nom`.
 
 ```{r}
 # tableaux
@@ -1748,7 +1748,7 @@ if(nrow(com1) > com1_hotel[1,12] & nrow(com2) > com2_hotel[1,12]){
 ```
 
 
-Ce document a pour objectif de comparer les performances et l'activité des logements Airbnb entre deux communes données, ici `r com1_nom` et `r com2_nom`. Ces deux communes concentrent respectivement `r nrow(com1)` et `r nrow(com2)` logements Airbnb en `r periode`, pour `r com1_hotel[1,12]` et `r com2_hotel[1,12]` chambres d'hôtel. `r comparhotel` Les logements Airbnb représentent respectivement `r (nrow(com1) * 100 / com1_log[1,21]) %>% round(digits = 1)` et `r (nrow(com2) * 100 / com2_log[1,21]) %>% round(digits = 1)`% de la totalité des logements des communes de `r com1_nom` et `r com2_nom`.
+S'agissant de `r com1_nom` et `r com2_nom`, ces communes concentrent respectivement `r nrow(com1)` et `r nrow(com2)` logements Airbnb en `r periode`, pour `r com1_hotel[1,12]` et `r com2_hotel[1,12]` chambres d'hôtel. `r comparhotel` Les logements Airbnb représentent respectivement `r (nrow(com1) * 100 / com1_log[1,21]) %>% round(digits = 1)` et `r (nrow(com2) * 100 / com2_log[1,21]) %>% round(digits = 1)`% de la totalité des logements des communes de `r com1_nom` et `r com2_nom`.
 
 ```{r}
 # tableaux
@@ -2404,12 +2404,3 @@ knitr::kable(evol, digits = 1) %>%
                               setNames(2, "Evolution"))) %>%
   column_spec(1, bold = TRUE)
 ```
-
-
-
-
-
-
-
-
-

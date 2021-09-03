@@ -1,5 +1,5 @@
 ---
-title: "Synthèse communale"
+title: "Synthèse à la commune"
 output: 
   html_document: 
     number_sections: yes
@@ -17,12 +17,14 @@ knitr::opts_chunk$set(eval = TRUE)
 knitr::opts_chunk$set(warning = FALSE)
 ```
 
-```{r}
+
+Cette partie a pour objectif de synthétiser les résultats obtenus lors des analyses menées sur chaque commune, structurée en 3 parties : État des lieux sur l’importance, la structure et la performance de l’offre Airbnb dans la commune en 2019, analyse temporelle 2015-2020, et analyse infra-communale. Les indicateurs utilisés permettent de quantifier l’activité d’Airbnb dans chaque commune, notamment en ce qui concerne la fréquentation ainsi que les revenus générés par les locations. Ils permettent aussi de différencier les communes selon le type de propriétaires qui y vivent et des logements mis en location. Notre hypothèse est celle d’une saturation du marché parisien, débordant vers les communes limitrophes. L’accent est ensuite mis sur la concentration du marché. Dans un second temps, la lumière est mise sur la période Covid, et la résilience des communes face à la chute du tourisme. Enfin, une analyse cartographique permet d’observer la distribution spatiale des logements Airbnb dans chaque commune, et de leur activité en terme de réservation.
+
+Le code R qui a permis de générer les représentations graphiques et tableaux est affiché pour la première commune. Il est exactement identique pour les deux autres communes, à l'exception de l'import des données.
+
+```{r, echo = TRUE}
 library(knitr) # Générer des rapports automatisés
 library(rmdformats) # Format du document markdown
-```
-
-```{r}
 library(readr) # Import de fichiers csv
 library(dplyr) # Manipulation de dataframes
 library(tidyr) # pareil
@@ -35,9 +37,12 @@ library(kableExtra) # Faire des beau tableaux
 ```
 
 
+
+<br>
+
 # Issy-Les-Moulineaux
 
-```{r}
+```{r, echo = TRUE}
 # Seuls les paramètres de ce chunk sont à changer
 
 mensuel_clean <- read_csv("data/consolidated/issy_mensuel.csv")
@@ -54,7 +59,7 @@ log <- read_csv("data/insee/log_issy.csv")
 ```
 
 
-```{r}
+```{r, echo = TRUE}
 # On ne sélectionne que l'année choisie
 mois <- mensuel_clean %>% filter(year == periode)
 annee <- mois %>% select(-mois, -`Occupancy Rate`, -Active, -year, -month, -day, -activite,
@@ -129,7 +134,7 @@ annee2_sf <- st_as_sf(annee2_sf, coords = c("longitude", "latitude"), crs = 4326
 ```
 
 
-```{r}
+```{r, echo = TRUE}
 annee_actifs <- annee %>% filter(nb_dispo > 0 | nb_nuitees > 0)
 annee_reserves <- annee %>% filter(nb_nuitees > 0)
 annee2_actifs <- annee2 %>% filter(nb_dispo > 0 | nb_nuitees > 0)
@@ -159,11 +164,13 @@ nrow(quali2) / nrow(quali %>% filter(Freq >= 2))*100
 # x% des logements loués par des multiloueurs sont des chambres privées ou partagées
 ```
 
+<br>
+
 ## Etat des lieux sur l'importance, la structure et la performance de l'offre Airbnb à `r commune` (`r periode`)
 
 En `r periode`, on compte `r nrow(annee)` logements inscrits sur la plateforme Airbnb à `r commune`, ce qui représente environ `r (nrow(annee) * 100 / log[1,21]) %>% round(digits = 1)`% de la totalité du marché du logement dans la commune[^1]. A titre de comparaison, on compte `r hotels[1,12]` chambres d'hôtel dans la commune[^2]. `r nrow(annee_actifs)` des logements Airbnb ont été proposés à la location au moins une fois sur l'année, et `r nrow(annee_reserves)` ont enregistré au moins une réservation. Un hôte qui rend son logement disponible a donc `r (nrow(annee_reserves) * 100 / nrow(annee_actifs)) %>% round(digits = 0)`% de chance d'engendrer une réservation. Les indicateurs calculés sur le tableau suivant prennent comme stock de référence ces `r nrow(annee_reserves)` logements réservés, dont `r nrow(entire)` sont des logements entiers, et `r nrow(private)` des chambres privées.
 
-```{r}
+```{r, echo = TRUE}
 indicateur <- data.frame(matrix(ncol = 4, nrow = 11))
 colnames(indicateur) <- c(paste("Indicateur (", periode ,")"), "Tous les logements", "Logements entiers", "Chambres privées")
 indicateur[ ,1] <- c("Taux d'activité (%)", "Prix par personne moyen (\\$)", "Taux de fréquentation moyen (%)", "Nombre moyen de nuitées disponibles", "Nombre moyen de nuitées réservées", "Part de logements loués fréquemment (>= 120 nuitées)", "Part de logements loués occasionnellement (<= 7 nuitées)", "Part des séjours de moins de 7 jours", "Part des séjours de 15 jours ou plus", "Part de logements détenus par des multiloueurs", "Revenu médian engendré par logement (\\$)")
@@ -231,9 +238,11 @@ kable(indicateur, align = "c", escape = F, digits = 0) %>%
 # En moyenne, un logement a proposé `r (mean(annee_reserves$nb_dispo) + mean(annee_reserves$nb_nuitees)) %>% round(digits = 1)` nuitées en `r periode`, et `r (mean(annee_reserves$nb_nuitees)) %>% round(digits = 1)` ont été réservées, soit `r (mean(annee_reserves$nb_nuitees) * 100 / (mean(annee_reserves$nb_dispo) + mean(annee_reserves$nb_nuitees))) %>% round(digits = 1)`%. Lorsque l'on découpe le nombre de nuitées réservées en classes, on peut distinguer les loueurs occasionnels (< 7 nuitées) des plus fréquents (> 120 nuitées) : `r tab$Pourcentage[5]`% des logements font partie de cette dernière catégorie.
 ```
 
+<br>
+
 ### Un marché concentré ?
 
-```{r fig.asp = 1, fig.width = 4, align = "left"}
+```{r fig.asp = 1, fig.width = 4, align = "left", echo = TRUE}
 breaks <- seq(0, max(annee_reserves$nb_nuitees), by = 1)
 
 test <- annee_reserves
@@ -278,7 +287,7 @@ ggplot2::annotate("text", x = ref_x + 5, y = val_y, label = paste0(round((ref_x)
     vjust = 1, hjust = 0, colour = "black")
 ```
 
-```{r fig.asp = 1, fig.width = 4, align = "right"}
+```{r fig.asp = 1, fig.width = 4, align = "right", echo = TRUE}
 breaks4 <- seq(0, max(annee_reserves$rev_tot), by = 1)
 
 test4 <- annee_actifs
@@ -327,7 +336,7 @@ ggplot2::annotate("text", x = ref_x2 + 5, y = val_y2, label = paste0(round((ref_
 
 Les nuitées sont assez concentrées dans un petit nombre de logements : en effet, `r round(ref_x)`% des logements concentrent `r round(val_y)`% des nuitées réservées de la commune. Lorsque l'on s'intéresse aux revenus engrangés, on observe que `r round(ref_x2)`% des logements concentrent près des `r round(val_y2)`% de la totalité des revenus générés par Airbnb en `r periode` à `r commune`.
 
-```{r}
+```{r, echo = TRUE}
 library(gridExtra) # pour mettre 2 graphiques côte à côte
 grid.arrange(plot1, plot2, ncol = 2)
 ```
@@ -347,7 +356,7 @@ sum <- (max(hotes_riches[, 2]) * 100 / sum(annee_reserves$rev_tot)) %>% round(di
 
 
 <br/><br/> <div style= "float:right;position: relative; top: -30px;">
-```{r fig.asp = 1, fig.width = 3, position = "float right"}
+```{r fig.asp = 1, fig.width = 3, position = "float right", echo = TRUE}
 knitr::kable(head(hotes_riches, 5), caption = paste("<center><strong>Top hôtes</strong></center>", periode))
 ```
 
@@ -366,7 +375,7 @@ En regardant les hôtes qui engrangent le plus de revenus, on trouve un multilou
 ## Analyse temporelle `r min(mensuel_clean$year)`-`r periode2`
 
 
-```{r}
+```{r, echo = TRUE}
 annee <- mutate(annee,
                 activite = case_when(
                   annee$nb_dispo == 0 & annee$nb_nuitees == 0 ~ "Jamais proposé",
@@ -403,11 +412,12 @@ L'arrêt de l'activité du marché Airbnb à `r commune` s'observe tout d'abord 
 Les courbes ci-dessus montrent un déclin du nombre de nuitées réservées à partir de mars 2020, lors de la période de restriction des déplacements. En effet, on observe une chute moyenne de `r -(mean(test$baisse)) %>% round(digits = 0)`% du taux de fréquentation par logement de `r periode` à `r periode2` Seul `r (nrow(test %>% filter(negatif < 0)) * 100 / nrow(test)) %>% round(digits = 1)`% des logements ont connu une hausse du nombre de leur visites entre `r periode` et `r periode2`
 Enfin, l'arrêt du tourisme se ressent au niveau des revenus : ils sont passés de près de `r (sum(annee_reserves$rev_tot)) %>% round(digits = -5)`\$  en `r periode` à `r (sum(annee2_reserves$rev_tot)) %>% round(digits = -5)`\$ en `r periode2`. 
 
+<br>
 
 ### activité
 
 
-```{r}
+```{r, echo = TRUE}
 # Les logements entiers engendraient `r (sum(entire$rev_tot) * 100 /sum(annee_reserves$rev_tot)) %>% round(digits = 0)`% des revenus totaux de la commune en `r periode`, contre `r (sum(entire2$rev_tot) * 100 /sum(annee2_reserves$rev_tot)) %>% round(digits = 0)`% en `r periode2`. On observe un léger fléchissement de la tendance, malgré une baisse similaire de l'effectif de ces logements (respectivement `r ((nrow(entire2) - nrow(entire))* 100 / nrow(entire)) %>% round(digits = 2)` et `r ((nrow(private2) - nrow(private))* 100 / nrow(private)) %>% round(digits = 2)`%) . De plus, la baisse de fréquentation entre `r periode` et `r periode2` est moins marquée chez les chambres privées (`r evol_private`%) que parmi les logements entiers (`r evol_entire`%). Les chambres privées sont-elles les grandes gagnantes d'un marché déstructuré ?
 
 reserves_n0 <- annee_reserves %>% select(id_logement, nb_nuitees, nb_dispo)
@@ -435,7 +445,7 @@ fracas <- merge(fracas, tab, by = "id_carre")
 ```
 
 
-```{r}
+```{r, echo = TRUE}
 # On crée la colonne jours_tot correspondant au nb de jours totaux durant lesquels le logement est en capacité d'être réservé
 mois_actifs <- mensuel_clean %>% filter(nb_dispo > 0 | nb_nuitees > 0)
 mois_actifs$jours_tot <- mois_actifs$nb_dispo + mois_actifs$nb_nuitees
@@ -467,7 +477,7 @@ p
 ```
 
  <br/> <br/> <div style= "float:left;position: relative; top: -10px;">
-```{r fig.height = 4, fig.width = 5.5, align = "left"}
+```{r fig.height = 4, fig.width = 5.5, align = "left", echo = TRUE}
 mois_reserves <- mensuel_clean %>% filter(nb_nuitees > 0)
   
 bilan2015 <- mois_reserves %>%
@@ -572,7 +582,7 @@ Les mois de juin et de septembre correspondent aux taux de fréquentation les pl
 ## Analyse infra-communale
 
 
-```{r}
+```{r, echo = TRUE}
 # fonction pour compter le nombre de points par carré
 CountPt <- function(x, pt){
   # Intersection avec l'objet sf de référence
@@ -593,7 +603,7 @@ grillecom$densite <- grillecom$densite %>% round(digits = 1)
 ```
 
 
-```{r}
+```{r, echo = TRUE}
 # pour compter la moyenne du prix par carré
 prixmedcarre <- annee_reserves_sf %>%
   group_by(id_carre) %>%
@@ -610,7 +620,7 @@ test$prixmed <- test$prixmed %>% round(digits = 2)
 
 
 
-```{r}
+```{r, echo = TRUE}
 test <- test %>% filter(surface > 0.3) # car valeurs trop élevées si 1 logement sur une petite partie d'un carreau
 
 bins <- getBreaks(v = test$prixmed, nclass = 6, method = "fisher-jenks")
@@ -679,7 +689,7 @@ leaflet() %>%
 
 <br/>
 
-```{r}
+```{r, echo = TRUE}
 # taux de fréquentation moyen par iris
 avgfreqiris <- annee_reserves_sf %>%
   group_by(id_iris) %>%
@@ -856,6 +866,8 @@ nrow(quali2) / nrow(quali %>% filter(Freq >= 2))*100
 # x% des logements loués par des multiloueurs sont des chambres privées ou partagées
 ```
 
+<br>
+
 ## Etat des lieux sur l'importance, la structure et la performance de l'offre Airbnb à `r commune` (`r periode`)
 
 En `r periode`, on compte `r nrow(annee)` logements inscrits sur la plateforme Airbnb à `r commune`, ce qui représente environ `r (nrow(annee) * 100 / log[1,21]) %>% round(digits = 1)`% de la totalité du marché du logement dans la commune[^1]. A titre de comparaison, on compte `r hotels[1,12]` chambres d'hôtel dans la commune[^2]. `r nrow(annee_actifs)` des logements Airbnb ont été proposés à la location au moins une fois sur l'année, et `r nrow(annee_reserves)` ont enregistré au moins une réservation. Un hôte qui rend son logement disponible a donc `r (nrow(annee_reserves) * 100 / nrow(annee_actifs)) %>% round(digits = 0)`% de chance d'engendrer une réservation. Les indicateurs calculés sur le tableau suivant prennent comme stock de référence ces `r nrow(annee_reserves)` logements réservés, dont `r nrow(entire)` sont des logements entiers, et `r nrow(private)` des chambres privées.
@@ -927,6 +939,8 @@ kable(indicateur, align = "c", escape = F, digits = 0) %>%
 
 # En moyenne, un logement a proposé `r (mean(annee_reserves$nb_dispo) + mean(annee_reserves$nb_nuitees)) %>% round(digits = 1)` nuitées en `r periode`, et `r (mean(annee_reserves$nb_nuitees)) %>% round(digits = 1)` ont été réservées, soit `r (mean(annee_reserves$nb_nuitees) * 100 / (mean(annee_reserves$nb_dispo) + mean(annee_reserves$nb_nuitees))) %>% round(digits = 1)`%. Lorsque l'on découpe le nombre de nuitées réservées en classes, on peut distinguer les loueurs occasionnels (< 7 nuitées) des plus fréquents (> 120 nuitées) : `r tab$Pourcentage[5]`% des logements font partie de cette dernière catégorie.
 ```
+
+<br>
 
 ### Un marché concentré ?
 
@@ -1100,6 +1114,7 @@ L'arrêt de l'activité du marché Airbnb à `r commune` s'observe tout d'abord 
 Les courbes ci-dessus montrent un déclin du nombre de nuitées réservées à partir de mars 2020, lors de la période de restriction des déplacements. En effet, on observe une chute moyenne de `r -(mean(test$baisse)) %>% round(digits = 0)`% du taux de fréquentation par logement de `r periode` à `r periode2` Seul `r (nrow(test %>% filter(negatif < 0)) * 100 / nrow(test)) %>% round(digits = 1)`% des logements ont connu une hausse du nombre de leur visites entre `r periode` et `r periode2`
 Enfin, l'arrêt du tourisme se ressent au niveau des revenus : ils sont passés de près de `r (sum(annee_reserves$rev_tot)) %>% round(digits = -5)`\$  en `r periode` à `r (sum(annee2_reserves$rev_tot)) %>% round(digits = -5)`\$ en `r periode2`. 
 
+<br>
 
 ### activité
 
@@ -1555,6 +1570,8 @@ nrow(quali2) / nrow(quali %>% filter(Freq >= 2))*100
 # x% des logements loués par des multiloueurs sont des chambres privées ou partagées
 ```
 
+<br>
+
 ## Etat des lieux sur l'importance, la structure et la performance de l'offre Airbnb à `r commune` (`r periode`)
 
 En `r periode`, on compte `r nrow(annee)` logements inscrits sur la plateforme Airbnb à `r commune`, ce qui représente environ `r (nrow(annee) * 100 / log[1,21]) %>% round(digits = 1)`% de la totalité du marché du logement dans la commune[^1]. A titre de comparaison, on compte `r hotels[1,12]` chambres d'hôtel dans la commune[^2]. `r nrow(annee_actifs)` des logements Airbnb ont été proposés à la location au moins une fois sur l'année, et `r nrow(annee_reserves)` ont enregistré au moins une réservation. Un hôte qui rend son logement disponible a donc `r (nrow(annee_reserves) * 100 / nrow(annee_actifs)) %>% round(digits = 0)`% de chance d'engendrer une réservation. Les indicateurs calculés sur le tableau suivant prennent comme stock de référence ces `r nrow(annee_reserves)` logements réservés, dont `r nrow(entire)` sont des logements entiers, et `r nrow(private)` des chambres privées.
@@ -1626,6 +1643,8 @@ kable(indicateur, align = "c", escape = F, digits = 0) %>%
 
 # En moyenne, un logement a proposé `r (mean(annee_reserves$nb_dispo) + mean(annee_reserves$nb_nuitees)) %>% round(digits = 1)` nuitées en `r periode`, et `r (mean(annee_reserves$nb_nuitees)) %>% round(digits = 1)` ont été réservées, soit `r (mean(annee_reserves$nb_nuitees) * 100 / (mean(annee_reserves$nb_dispo) + mean(annee_reserves$nb_nuitees))) %>% round(digits = 1)`%. Lorsque l'on découpe le nombre de nuitées réservées en classes, on peut distinguer les loueurs occasionnels (< 7 nuitées) des plus fréquents (> 120 nuitées) : `r tab$Pourcentage[5]`% des logements font partie de cette dernière catégorie.
 ```
+
+<br>
 
 ### Un marché concentré ?
 
@@ -1800,8 +1819,9 @@ Les courbes ci-dessus montrent un déclin du nombre de nuitées réservées à p
 Enfin, l'arrêt du tourisme se ressent au niveau des revenus : ils sont passés de près de `r (sum(annee_reserves$rev_tot)) %>% round(digits = -5)`\$  en `r periode` à `r (sum(annee2_reserves$rev_tot)) %>% round(digits = -5)`\$ en `r periode2`. 
 
 
-### activité
+<br>
 
+### activité
 
 ```{r}
 # Les logements entiers engendraient `r (sum(entire$rev_tot) * 100 /sum(annee_reserves$rev_tot)) %>% round(digits = 0)`% des revenus totaux de la commune en `r periode`, contre `r (sum(entire2$rev_tot) * 100 /sum(annee2_reserves$rev_tot)) %>% round(digits = 0)`% en `r periode2`. On observe un léger fléchissement de la tendance, malgré une baisse similaire de l'effectif de ces logements (respectivement `r ((nrow(entire2) - nrow(entire))* 100 / nrow(entire)) %>% round(digits = 2)` et `r ((nrow(private2) - nrow(private))* 100 / nrow(private)) %>% round(digits = 2)`%) . De plus, la baisse de fréquentation entre `r periode` et `r periode2` est moins marquée chez les chambres privées (`r evol_private`%) que parmi les logements entiers (`r evol_entire`%). Les chambres privées sont-elles les grandes gagnantes d'un marché déstructuré ?
