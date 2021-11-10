@@ -27,4 +27,6 @@ Encadrement réalisé par Marianne Guérois, Malika Madelin et Ronan Ysebaert.
 <br>
 
 
-# Présentation de soutenance
+# Présentation ANR
+
+Cette [présentation](Memoire/WHISDHOM_airdna_10nov2021_vf.pdf) réalisée en séminaire d'ANR par Marianne Guérois (10 novembre 2021) restitue les résultats principaux issus du stage. 
